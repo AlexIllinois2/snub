@@ -123,6 +123,9 @@ object HailData {
     const val SWIPE_FREEZE_ENABLED = "swipe_freeze_enabled"
     const val SWIPE_FREEZE_INTERVAL = "swipe_freeze_interval_f"
     const val SWIPE_FREEZE_DELAY = "swipe_freeze_delay_f"
+    const val LOW_BATTERY_SHUTDOWN = "low_battery_shutdown"
+    const val LOW_BATTERY_LEVEL = "low_battery_level_f"
+    const val LOW_BATTERY_NOTIFY_SECONDS = "low_battery_notify_seconds_f"
     const val DYNAMIC_SHORTCUT_ACTION = "dynamic_shortcut_action"
     val DYNAMIC_SHORTCUT_ACTIONS = listOf(
         ACTION_NONE,
@@ -160,6 +163,9 @@ object HailData {
     val swipeFreezeEnabled get() = sp.getBoolean(SWIPE_FREEZE_ENABLED, false)
     val swipeFreezeInterval get() = sp.getFloat(SWIPE_FREEZE_INTERVAL, 1f)
     val swipeFreezeDelay get() = sp.getFloat(SWIPE_FREEZE_DELAY, 1f)
+    val lowBatteryShutdown get() = sp.getBoolean(LOW_BATTERY_SHUTDOWN, false)
+    val lowBatteryLevel get() = sp.getFloat(LOW_BATTERY_LEVEL, 5f).toInt()
+    val lowBatteryNotifySeconds get() = sp.getFloat(LOW_BATTERY_NOTIFY_SECONDS, 30f).toLong()
     val dynamicShortcutAction get() = sp.getString(DYNAMIC_SHORTCUT_ACTION, ACTION_NONE)!!
 
     private val dir = "${app.filesDir.path}/v1"

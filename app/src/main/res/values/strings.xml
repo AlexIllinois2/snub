@@ -132,6 +132,13 @@
     <string name="swipe_freeze_delay">Freeze delay after unfreeze (seconds)</string>
     <string name="swipe_freeze_needs_root">Requires a Root working mode</string>
     <string name="swipe_freeze_abnormal">Swipe freeze stopped: unexpected output from dumpsys. Your ROM may be unsupported.</string>
+    <string name="low_battery_shutdown">Auto shutdown on low battery</string>
+    <string name="low_battery_notification_title">Low battery auto shutdown is running</string>
+    <string name="low_battery_countdown_title">The device will shut down in %1$d s</string>
+    <string name="low_battery_level">Shutdown threshold (%)</string>
+    <string name="low_battery_notify_seconds">Countdown before shutdown (seconds)</string>
+    <string name="low_battery_cancelled">Auto shutdown cancelled</string>
+    <string name="low_battery_channel_alert">Shutdown countdown</string>
     <string name="title_shortcuts">Shortcuts</string>
     <string name="msg_guide">Before freezing applications, please select a working mode in the settings.</string>
     <string name="dynamic_shortcut_action">Dynamic shortcut action</string>

@@ -30,6 +30,8 @@ object HShell {
 
     val lockScreen get() = execSU("input keyevent KEYCODE_POWER").first == 0
 
+    fun powerOff(): Boolean = execSU("reboot -p").first == 0
+
     fun forceStopApp(packageName: String): Boolean = execSU("am force-stop $userArg $packageName").first == 0
 
     fun setAppDisabled(packageName: String, disabled: Boolean): Boolean =

@@ -119,6 +119,13 @@
     <string name="swipe_freeze_delay">解冻后冻结延时（秒）</string>
     <string name="swipe_freeze_needs_root">需要 Root 工作模式</string>
     <string name="swipe_freeze_abnormal">划掉冻结已停止：dumpsys 输出异常，你的 ROM 可能不受支持。</string>
+    <string name="low_battery_shutdown">低电量自动关机</string>
+    <string name="low_battery_notification_title">低电量自动关机服务运行中</string>
+    <string name="low_battery_countdown_title">设备将在 %1$d 秒后关机</string>
+    <string name="low_battery_level">关机电量阈值（%）</string>
+    <string name="low_battery_notify_seconds">关机前倒计时（秒）</string>
+    <string name="low_battery_cancelled">已取消本次自动关机</string>
+    <string name="low_battery_channel_alert">关机倒计时</string>
     <string name="mode_owner_suspend">设备所有者 - 暂停</string>
     <string name="mode_su_suspend">Root - 暂停</string>
     <string name="mode_shizuku_suspend">Shizuku - 暂停</string>

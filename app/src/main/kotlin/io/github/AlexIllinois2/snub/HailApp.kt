@@ -12,6 +12,7 @@ import androidx.core.content.getSystemService
 import io.github.AlexIllinois2.snub.app.AppManager
 import io.github.AlexIllinois2.snub.app.HailData
 import io.github.AlexIllinois2.snub.services.AutoFreezeService
+import io.github.AlexIllinois2.snub.services.LowBatteryShutdownService
 import io.github.AlexIllinois2.snub.services.SwipeFreezeService
 import io.github.AlexIllinois2.snub.utils.HDhizuku
 import io.github.AlexIllinois2.snub.utils.HTarget
@@ -27,6 +28,9 @@ class HailApp : Application() {
         // so the service must be restored here as well as on boot.
         if (HailData.swipeFreezeEnabled && HailData.workingMode.startsWith(HailData.SU)) {
             setSwipeFreezeService(true)
+        }
+        if (HailData.lowBatteryShutdown && HailData.workingMode.startsWith(HailData.SU)) {
+            setLowBatteryShutdownService(true)
         }
     }
 
@@ -54,6 +58,12 @@ class HailApp : Application() {
 
     fun setSwipeFreezeService(enabled: Boolean = HailData.swipeFreezeEnabled) {
         val intent = Intent(this, SwipeFreezeService::class.java)
+        if (enabled) ContextCompat.startForegroundService(this, intent)
+        else stopService(intent)
+    }
+
+    fun setLowBatteryShutdownService(enabled: Boolean = HailData.lowBatteryShutdown) {
+        val intent = Intent(this, LowBatteryShutdownService::class.java)
         if (enabled) ContextCompat.startForegroundService(this, intent)
         else stopService(intent)
     }

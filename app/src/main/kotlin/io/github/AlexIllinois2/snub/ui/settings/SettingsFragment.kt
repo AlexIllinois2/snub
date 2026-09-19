@@ -78,6 +78,7 @@ class SettingsFragment : MainFragment(), MenuProvider {
     private fun SettingsScreen() {
         val autoFreezeAfterLock = rememberPreferenceState(HailData.AUTO_FREEZE_AFTER_LOCK, false)
         val swipeFreezeEnabled = rememberPreferenceState(HailData.SWIPE_FREEZE_ENABLED, false)
+        val lowBatteryShutdown = rememberPreferenceState(HailData.LOW_BATTERY_SHUTDOWN, false)
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             listPreference(
                 key = HailData.WORKING_MODE,
@@ -271,6 +272,45 @@ class SettingsFragment : MainFragment(), MenuProvider {
                 enabled = { swipeFreezeEnabled.value },
                 icon = { Icon(imageVector = Icons.Outlined.HourglassTop, contentDescription = null) },
                 valueText = { Text(text = "%.1f s".format(it)) },
+            )
+            horizontalDivider()
+            preferenceCategory(
+                key = "low_battery_shutdown",
+                title = { Text(text = stringResource(R.string.low_battery_shutdown)) }
+            )
+            switchPreference(
+                rememberState = { lowBatteryShutdown },
+                onValueChange = { _, value ->
+                    if (value && !HailData.workingMode.startsWith(HailData.SU)) {
+                        HUI.showToast(R.string.swipe_freeze_needs_root)
+                        false
+                    } else {
+                        app.setLowBatteryShutdownService(value)
+                        true
+                    }
+                },
+                titleId = R.string.low_battery_shutdown,
+                icon = Icons.Outlined.PowerSettingsNew
+            )
+            sliderPreference(
+                key = HailData.LOW_BATTERY_LEVEL,
+                defaultValue = 5f,
+                title = { Text(text = stringResource(R.string.low_battery_level)) },
+                valueRange = 1f..30f,
+                valueSteps = 29,
+                enabled = { lowBatteryShutdown.value },
+                icon = { Icon(imageVector = Icons.Outlined.BatteryAlert, contentDescription = null) },
+                valueText = { Text(text = "%.0f%%".format(it)) },
+            )
+            sliderPreference(
+                key = HailData.LOW_BATTERY_NOTIFY_SECONDS,
+                defaultValue = 30f,
+                title = { Text(text = stringResource(R.string.low_battery_notify_seconds)) },
+                valueRange = 5f..120f,
+                valueSteps = 23,
+                enabled = { lowBatteryShutdown.value },
+                icon = { Icon(imageVector = Icons.Outlined.Timer, contentDescription = null) },
+                valueText = { Text(text = "%.0f s".format(it)) },
             )
             horizontalDivider()
             preferenceCategory(key = "shortcuts", title = { Text(text = stringResource(R.string.title_shortcuts)) })

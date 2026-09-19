@@ -153,6 +153,14 @@
                     android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                     android:value="swipe_freeze"/>
         </service>
+        <service
+                android:name=".services.LowBatteryShutdownService"
+                android:exported="false"
+                android:foregroundServiceType="specialUse">
+            <property
+                    android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                    android:value="low_battery_shutdown"/>
+        </service>
     </application>
 
 </manifest>
