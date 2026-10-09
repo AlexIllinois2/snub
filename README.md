@@ -19,6 +19,10 @@ freeze Android apps. [GitHub Releases](https://github.com/AlexIllinois2/snub/rel
   in one go, instead of adding them one by one.
 - **Auto-refresh apps list**: the apps page automatically refreshes on the first entry after the app
   returns to the foreground, so newly installed apps show up without a manual refresh.
+- **Low battery auto shutdown**: a foreground service (Root working mode only) monitors the battery level and
+  shuts the device down once it drops to the configured threshold. A countdown notification with a cancel button
+  is shown before shutdown, and plugging in the charger also cancels the pending shutdown. Threshold and countdown
+  length are configurable in Settings, and the service is restored on boot.
 - **Per-tag auto-freeze policies**: each tag can individually enable *freeze after going to background*
   and *freeze after screen locked*, each with its own timeout in seconds (0 = freeze immediately).
   The global auto-freeze switch, delay and the quick settings tile "Auto freeze" toggle action were removed.
