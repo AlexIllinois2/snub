@@ -8,7 +8,6 @@ import android.content.IntentFilter
 import android.os.BatteryManager
 import android.os.PowerManager
 import androidx.core.content.getSystemService
-import io.github.AlexIllinois2.snub.app.HailData
 
 object HSystem {
     fun isInteractive(context: Context): Boolean {
@@ -39,17 +38,14 @@ object HSystem {
     fun checkOpUsageStats(context: Context): Boolean =
         checkOp(context, AppOpsManager.OPSTR_GET_USAGE_STATS)
 
-    fun isForegroundApp(context: Context, packageName: String): Boolean {
-        val usageStatsManager = context.getSystemService<UsageStatsManager>()!!
+    fun queryUsageStats(context: Context) = context.getSystemService<UsageStatsManager>()!!.run {
         val now = System.currentTimeMillis()
-        val stats = usageStatsManager.queryUsageStats(
-            UsageStatsManager.INTERVAL_BEST,
-            now - 1000 * 60 * (HailData.autoFreezeDelay + 1), now  // to ensure that we can get the last app used
-        )?.sortedBy { it.lastTimeUsed }
-        val foregroundPackageName = stats?.let {
-            if (it.isEmpty()) return@let null
-            it.last()?.packageName
-        }
-        return foregroundPackageName == packageName
+        queryUsageStats(UsageStatsManager.INTERVAL_BEST, now - 1000 * 60 * 60, now)  // to ensure that we can get the last app used
     }
+
+    fun getForegroundPackageName(context: Context): String? =
+        queryUsageStats(context)?.maxByOrNull { it.lastTimeUsed }?.packageName
+
+    fun isForegroundApp(context: Context, packageName: String): Boolean =
+        getForegroundPackageName(context) == packageName
 }

@@ -116,7 +116,6 @@
     <string name="action_export_current">Elporti videblajn</string>
     <string name="action_export_all">Elporti ĉiujn</string>
     <string name="skip_notifying_app">Preterlasi sciigadon de aplikaĵo</string>
-    <string name="auto_freeze_delay">Frostiga prokrasto (minutoj)</string>
     <string name="title_shortcuts">Fulmoklavoj</string>
     <string name="msg_guide">Antaŭ frostigi aplikaĵojn, bonvolu elekti laborreĝimon en la agordoj.</string>
     <string name="dynamic_shortcut_action">Dinamika fulmoklava agado</string>

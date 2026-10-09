@@ -111,7 +111,6 @@
     <string name="action_export_current">Экспорт текущих</string>
     <string name="action_export_all">Экспорт всех</string>
     <string name="skip_notifying_app">Пропускать приложения с уведомлением</string>
-    <string name="auto_freeze_delay">Задержка заморозки (минуты)</string>
     <string name="action_whitelist">Добавить в белый список</string>
     <string name="action_remove_whitelist">Удалить из белого списка</string>
     <string name="mode_owner_suspend">Владелец устройства - Приостановить</string>

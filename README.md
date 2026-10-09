@@ -17,6 +17,16 @@ freeze Android apps. [GitHub Releases](https://github.com/AlexIllinois2/snub/rel
   service is restored on boot.
 - **Batch home screen shortcuts**: create launcher shortcuts for all eligible frozen apps on a tag page
   in one go, instead of adding them one by one.
+- **Auto-refresh apps list**: the apps page automatically refreshes on the first entry after the app
+  returns to the foreground, so newly installed apps show up without a manual refresh.
+- **Per-tag auto-freeze policies**: each tag can individually enable *freeze after going to background*
+  and *freeze after screen locked*, each with its own timeout in seconds (0 = freeze immediately).
+  The global auto-freeze switch, delay and the quick settings tile "Auto freeze" toggle action were removed.
+- **Single tag per app**: an app can only belong to one tag (previously multiple tags).
+- **Silent home screen shortcuts**: optionally create home screen shortcuts silently (no confirmation
+  dialogs) for newly managed apps, or batch-create silent shortcuts for managed apps without one from
+  the home menu. Silent creation relies on the legacy `INSTALL_SHORTCUT` broadcast, which requires
+  launcher support.
 - **CI releases**: GitHub Actions automatically builds and attaches an APK to a GitHub Release on tag push.
 
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="32%" /> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="32%" /> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width="32%" />

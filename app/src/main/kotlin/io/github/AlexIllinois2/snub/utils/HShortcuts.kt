@@ -8,12 +8,18 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
+import io.github.AlexIllinois2.snub.BuildConfig
 import io.github.AlexIllinois2.snub.HailApp.Companion.app
 import io.github.AlexIllinois2.snub.R
 import io.github.AlexIllinois2.snub.app.AppInfo
 import io.github.AlexIllinois2.snub.app.HailApi
 import io.github.AlexIllinois2.snub.app.HailData
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import me.zhanghai.android.appiconloader.AppIconLoader
 
@@ -91,6 +97,76 @@ object HShortcuts {
             awaitNext()
         }
         return requested
+    }
+
+    private val silentScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val silentMutex = Mutex()
+
+    /**
+     * Silently creates a home screen shortcut for a newly managed app,
+     * if the corresponding option is enabled and no shortcut has been created for it yet.
+     */
+    fun autoCreateSilentShortcut(packageName: String) {
+        if (!HailData.autoShortcutNewApps || packageName == BuildConfig.APPLICATION_ID) return
+        if (hasSilentShortcut(packageName)) return
+        silentScope.launch { createSilentShortcut(packageName) }
+    }
+
+    /**
+     * Whether a home screen shortcut has been created for the package,
+     * either silently via [createSilentShortcut] or by a confirmed pin request
+     * (per-app pin shortcuts use the package name as their id).
+     */
+    fun hasSilentShortcut(packageName: String): Boolean =
+        HailData.isShortcutCreated(packageName) || runCatching {
+            ShortcutManagerCompat.getShortcuts(app, ShortcutManagerCompat.FLAG_MATCH_PINNED)
+                .any { it.id == packageName }
+        }.getOrDefault(false)
+
+    /**
+     * Sends the legacy INSTALL_SHORTCUT broadcast, to which launchers supporting it respond
+     * by placing the shortcut on the home screen silently, without a confirmation dialog.
+     * Whether the launcher actually handled the broadcast is not observable;
+     * the package is recorded as having a shortcut regardless.
+     *
+     * @return whether the broadcast was sent.
+     */
+    suspend fun createSilentShortcut(packageName: String): Boolean = withContext(Dispatchers.Default) {
+        silentMutex.withLock {
+            val applicationInfo = HPackages.getApplicationInfoOrNull(packageName)
+                ?: return@withContext false // Ghost data of uninstalled apps
+            runCatching {
+                // Intent.ACTION_INSTALL_SHORTCUT was removed in API 36; the constant value is unchanged.
+                app.sendBroadcast(Intent("android.intent.action.INSTALL_SHORTCUT").apply {
+                    putExtra(
+                        Intent.EXTRA_SHORTCUT_INTENT,
+                        HailApi.getIntentForPackage(HailApi.ACTION_LAUNCH, packageName)
+                    )
+                    putExtra(
+                        Intent.EXTRA_SHORTCUT_NAME,
+                        applicationInfo.loadLabel(app.packageManager).toString()
+                    )
+                    putExtra(
+                        Intent.EXTRA_SHORTCUT_ICON,
+                        IconPack.loadIcon(packageName) ?: iconLoader.loadIcon(applicationInfo)
+                    )
+                    putExtra("duplicate", false) // Avoid duplicated icons where supported
+                })
+                HailData.addShortcutCreated(packageName)
+            }.isSuccess
+        }
+    }
+
+    /**
+     * Silently creates home screen shortcuts for [apps], one by one.
+     * @return the number of broadcasts sent.
+     */
+    suspend fun createSilentShortcuts(apps: List<AppInfo>): Int {
+        var created = 0
+        for (appInfo in apps) {
+            if (createSilentShortcut(appInfo.packageName)) created++
+        }
+        return created
     }
 
     fun addDynamicShortcut(packageName: String) {

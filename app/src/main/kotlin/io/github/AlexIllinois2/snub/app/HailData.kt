@@ -6,8 +6,18 @@ import io.github.AlexIllinois2.snub.BuildConfig
 import io.github.AlexIllinois2.snub.HailApp.Companion.app
 import io.github.AlexIllinois2.snub.R
 import io.github.AlexIllinois2.snub.utils.HFiles
+import io.github.AlexIllinois2.snub.utils.HShortcuts
 import org.json.JSONArray
 import org.json.JSONObject
+
+data class Tag(
+    var name: String,
+    var id: Int,
+    var autoFreezeBackground: Boolean = false,
+    var autoFreezeBackgroundDelay: Float = 0f,  // seconds, 0 = freeze immediately
+    var autoFreezeLock: Boolean = false,
+    var autoFreezeLockDelay: Float = 0f  // seconds, 0 = freeze immediately
+)
 
 object HailData {
     const val URL_WHY_FREE_SOFTWARE = "https://www.gnu.org/philosophy/free-software-even-more-important.html"
@@ -24,9 +34,13 @@ object HailData {
     const val URL_PAYPAL = "https://www.paypal.me/aistra0528"
     const val URL_TRANSLATE = "https://hosted.weblate.org/engage/hail/"
     const val VERSION = "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})"
-    private const val KEY_ID = "id"
+    const val KEY_ID = "id"
     const val KEY_TAG = "tag"
     private const val KEY_TAGS = "tags"
+    private const val KEY_AUTO_FREEZE_BACKGROUND = "auto_freeze_background"
+    private const val KEY_AUTO_FREEZE_BACKGROUND_DELAY = "auto_freeze_background_delay"
+    private const val KEY_AUTO_FREEZE_LOCK = "auto_freeze_lock"
+    private const val KEY_AUTO_FREEZE_LOCK_DELAY = "auto_freeze_lock_delay"
     private const val KEY_PINNED = "pinned"
     private const val KEY_WHITELISTED = "whitelisted"
     const val KEY_PACKAGE = "package"
@@ -108,15 +122,12 @@ object HailData {
     const val ACTION_LOCK_FREEZE = "lock_freeze"
     val TILE_ACTION_VALUES =
         listOf(
-            AUTO_FREEZE_AFTER_LOCK,
             ACTION_FREEZE_ALL,
             ACTION_UNFREEZE_ALL,
             ACTION_FREEZE_NON_WHITELISTED,
             ACTION_LOCK,
             ACTION_LOCK_FREEZE
         )
-    const val AUTO_FREEZE_AFTER_LOCK = "auto_freeze_after_lock"
-    const val AUTO_FREEZE_DELAY = "auto_freeze_delay_f"
     const val SKIP_WHILE_CHARGING = "skip_while_charging"
     const val SKIP_FOREGROUND_APP = "skip_foreground_app"
     const val SKIP_NOTIFYING_APP = "skip_notifying_app"
@@ -135,6 +146,8 @@ object HailData {
         ACTION_LOCK,
         ACTION_LOCK_FREEZE
     )
+    const val AUTO_SHORTCUT_NEW_APPS = "auto_shortcut_new_apps"
+    const val SHORTCUT_CREATED_APPS = "shortcut_created_apps"
 
     private val sp = PreferenceManager.getDefaultSharedPreferences(app)
     val sortBy get() = sp.getString(SORT_BY, SORT_NAME)
@@ -152,11 +165,7 @@ object HailData {
     val homeFontSize get() = sp.getFloat(HOME_FONT_SIZE, 14f)
     val fuzzySearch get() = sp.getBoolean(FUZZY_SEARCH, false)
     val nineKeySearch get() = sp.getBoolean(NINE_KEY_SEARCH, false)
-    val tileAction get() = sp.getString(TILE_ACTION, AUTO_FREEZE_AFTER_LOCK)!!
-    var autoFreezeAfterLock
-        get() = sp.getBoolean(AUTO_FREEZE_AFTER_LOCK, false)
-        set(value) = sp.edit { putBoolean(AUTO_FREEZE_AFTER_LOCK, value) }
-    val autoFreezeDelay get() = sp.getFloat(AUTO_FREEZE_DELAY, 0f).toLong()
+    val tileAction get() = sp.getString(TILE_ACTION, ACTION_FREEZE_ALL)!!
     val skipWhileCharging get() = sp.getBoolean(SKIP_WHILE_CHARGING, false)
     val skipForegroundApp get() = sp.getBoolean(SKIP_FOREGROUND_APP, false)
     val skipNotifyingApp get() = sp.getBoolean(SKIP_NOTIFYING_APP, false)
@@ -167,6 +176,19 @@ object HailData {
     val lowBatteryLevel get() = sp.getFloat(LOW_BATTERY_LEVEL, 5f).toInt()
     val lowBatteryNotifySeconds get() = sp.getFloat(LOW_BATTERY_NOTIFY_SECONDS, 30f).toLong()
     val dynamicShortcutAction get() = sp.getString(DYNAMIC_SHORTCUT_ACTION, ACTION_NONE)!!
+    val autoShortcutNewApps get() = sp.getBoolean(AUTO_SHORTCUT_NEW_APPS, false)
+
+    fun isShortcutCreated(packageName: String): Boolean =
+        sp.getStringSet(SHORTCUT_CREATED_APPS, emptySet())?.contains(packageName) == true
+
+    fun addShortcutCreated(packageName: String) {
+        sp.edit {
+            putStringSet(
+                SHORTCUT_CREATED_APPS,
+                (sp.getStringSet(SHORTCUT_CREATED_APPS, emptySet()) ?: emptySet()) + packageName
+            )
+        }
+    }
 
     private val dir = "${app.filesDir.path}/v1"
     private val appsPath = "$dir/apps.json"
@@ -182,9 +204,7 @@ object HailData {
                             packageName = getString(KEY_PACKAGE),
                             pinned = optBoolean(KEY_PINNED),
                             whitelisted = optBoolean(KEY_WHITELISTED),
-                            tagIdList = optJSONArray(KEY_TAGS)?.let {
-                                MutableList(it.length()) { index -> it.getInt(index) }
-                            } ?: mutableListOf(optInt(KEY_TAG))
+                            tagId = optJSONArray(KEY_TAGS)?.optInt(0, 0) ?: optInt(KEY_TAG)
                         )
                     })
                 }
@@ -197,9 +217,12 @@ object HailData {
     fun isWhitelisted(packageName: String): Boolean =
         checkedList.find { it.packageName == packageName }?.whitelisted == true
 
+    val anyAutoFreezePolicy get() = tags.any { it.autoFreezeBackground || it.autoFreezeLock }
+
     fun addCheckedApp(packageName: String, tagId: Int = 0, saveApps: Boolean = true) {
-        checkedList.add(AppInfo(packageName, tagIdList = mutableListOf(tagId)))
+        checkedList.add(AppInfo(packageName, tagId = tagId))
         if (saveApps) saveApps()
+        HShortcuts.autoCreateSilentShortcut(packageName)
     }
 
     fun removeCheckedApp(packageName: String, saveApps: Boolean = true) {
@@ -216,23 +239,31 @@ object HailData {
                         .put(KEY_PACKAGE, it.packageName)
                         .put(KEY_PINNED, it.pinned)
                         .put(KEY_WHITELISTED, it.whitelisted)
-                        .put(KEY_TAGS, JSONArray(it.tagIdList))
+                        .put(KEY_TAG, it.tagId)
                 )
             }
             toString()
         })
     }
 
-    val tags: MutableList<Pair<String, Int>> by lazy {
-        mutableListOf<Pair<String, Int>>().apply {
+    val tags: MutableList<Tag> by lazy {
+        mutableListOf<Tag>().apply {
             runCatching {
                 val json = JSONArray(HFiles.read(tagsPath))
                 for (i in 0 until json.length()) {
-                    add(with(json.getJSONObject(i)) { getString(KEY_TAG) to getInt(KEY_ID) })
+                    add(with(json.getJSONObject(i)) {
+                        Tag(
+                            name = getString(KEY_TAG),
+                            id = getInt(KEY_ID),
+                            autoFreezeBackground = optBoolean(KEY_AUTO_FREEZE_BACKGROUND),
+                            autoFreezeBackgroundDelay = optDouble(KEY_AUTO_FREEZE_BACKGROUND_DELAY, 0.0).toFloat(),
+                            autoFreezeLock = optBoolean(KEY_AUTO_FREEZE_LOCK),
+                            autoFreezeLockDelay = optDouble(KEY_AUTO_FREEZE_LOCK_DELAY, 0.0).toFloat()
+                        )
+                    })
                 }
-            }.onFailure {
-                add(app.getString(R.string.label_default) to 0)
             }
+            if (none { it.id == 0 }) add(0, Tag(app.getString(R.string.label_default), 0))
         }
     }
 
@@ -240,7 +271,15 @@ object HailData {
         if (!HFiles.exists(dir)) HFiles.createDirectories(dir)
         HFiles.write(tagsPath, JSONArray().run {
             tags.forEach {
-                put(JSONObject().put(KEY_TAG, it.first).put(KEY_ID, it.second))
+                put(
+                    JSONObject()
+                        .put(KEY_TAG, it.name)
+                        .put(KEY_ID, it.id)
+                        .put(KEY_AUTO_FREEZE_BACKGROUND, it.autoFreezeBackground)
+                        .put(KEY_AUTO_FREEZE_BACKGROUND_DELAY, it.autoFreezeBackgroundDelay.toDouble())
+                        .put(KEY_AUTO_FREEZE_LOCK, it.autoFreezeLock)
+                        .put(KEY_AUTO_FREEZE_LOCK_DELAY, it.autoFreezeLockDelay.toDouble())
+                )
             }
             toString()
         })

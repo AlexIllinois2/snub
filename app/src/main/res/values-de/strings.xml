@@ -114,7 +114,6 @@
     <string name="action_export_current">Sichtbare exportieren</string>
     <string name="action_export_all">Alle exportieren</string>
     <string name="skip_notifying_app">Apps die Benachrichtigungen senden ignorieren</string>
-    <string name="auto_freeze_delay">Einfrierverzögerung in Minuten</string>
     <string name="title_shortcuts">Verknüpfungen</string>
     <string name="msg_guide">Vor dem Einfrieren, bitte in den Einstellungen einen Arbeitsmodus auswälen.</string>
     <string name="dynamic_shortcut_action">Aktion für dynamische Verknüpfung</string>

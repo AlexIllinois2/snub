@@ -27,6 +27,7 @@
     <string name="action_unfreeze">Unfreeze</string>
     <string name="action_deferred_task">Deferred task</string>
     <string name="action_tag_add">Add tag</string>
+    <string name="action_tag_edit">Edit tag</string>
     <string name="action_tag_remove">Remove tag</string>
     <string name="action_tag_set">Set tag</string>
     <string name="action_add_pin_shortcut">Add to Home screen</string>
@@ -34,6 +35,9 @@
     <string name="msg_adding_shortcuts">Requested %1$s/%2$s</string>
     <string name="msg_shortcuts_requested">Requested shortcuts for %1$s apps</string>
     <string name="msg_shortcuts_none">No eligible apps. Only frozen apps with a launcher activity can be added.</string>
+    <string name="action_add_shortcuts_silent">Add shortcuts for apps without one (silent)</string>
+    <string name="msg_add_silent_shortcuts">Silent home screen shortcuts will be created for %1$s apps, without confirmation dialogs. The launcher needs to support silent shortcut creation.</string>
+    <string name="msg_shortcuts_created">Created silent shortcuts for %1$s apps</string>
     <string name="action_export_clipboard">Export to Clipboard</string>
     <string name="action_import_clipboard">Import from Clipboard</string>
     <string name="action_remove_home">Remove from Home</string>
@@ -107,6 +111,9 @@
     <string name="auto_freeze">Auto freeze</string>
     <string name="auto_freeze_notification_title">Auto freeze service is running</string>
     <string name="auto_freeze_after_lock">After screen locked</string>
+    <string name="auto_freeze_background">After going to background</string>
+    <string name="freeze_immediately">Freeze immediately</string>
+    <string name="seconds_format">%d s</string>
     <string name="skip_while_charging">Skip while charging</string>
     <string name="skip_foreground_app">Skip foreground app</string>
     <string name="title_customize">Customize</string>
@@ -125,7 +132,6 @@
     <string name="action_export_current">Export visible</string>
     <string name="action_export_all">Export all</string>
     <string name="skip_notifying_app">Skip notifying app</string>
-    <string name="auto_freeze_delay">Freeze delay (minutes)</string>
     <string name="swipe_freeze">Auto freeze on swipe</string>
     <string name="swipe_freeze_notification_title">Swipe freeze service is running</string>
     <string name="swipe_freeze_interval">Polling interval (seconds)</string>
@@ -140,6 +146,7 @@
     <string name="low_battery_cancelled">Auto shutdown cancelled</string>
     <string name="low_battery_channel_alert">Shutdown countdown</string>
     <string name="title_shortcuts">Shortcuts</string>
+    <string name="auto_shortcut_new_apps">Create shortcuts for newly managed apps (silent)</string>
     <string name="msg_guide">Before freezing applications, please select a working mode in the settings.</string>
     <string name="dynamic_shortcut_action">Dynamic shortcut action</string>
     <string name="action_none">None</string>

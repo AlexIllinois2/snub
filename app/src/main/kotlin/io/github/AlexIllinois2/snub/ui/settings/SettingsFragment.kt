@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.AddToHomeScreen
 import androidx.compose.material.icons.automirrored.outlined.ManageSearch
 import androidx.compose.material.icons.automirrored.outlined.Shortcut
 import androidx.compose.material.icons.outlined.*
@@ -76,7 +77,6 @@ class SettingsFragment : MainFragment(), MenuProvider {
 
     @Composable
     private fun SettingsScreen() {
-        val autoFreezeAfterLock = rememberPreferenceState(HailData.AUTO_FREEZE_AFTER_LOCK, false)
         val swipeFreezeEnabled = rememberPreferenceState(HailData.SWIPE_FREEZE_ENABLED, false)
         val lowBatteryShutdown = rememberPreferenceState(HailData.LOW_BATTERY_SHUTDOWN, false)
         LazyColumn(modifier = Modifier.fillMaxSize()) {
@@ -183,29 +183,10 @@ class SettingsFragment : MainFragment(), MenuProvider {
             horizontalDivider()
             preferenceCategory(key = "auto_freeze", title = { Text(text = stringResource(R.string.auto_freeze)) })
             switchPreference(
-                rememberState = { autoFreezeAfterLock },
-                onValueChange = { _, value ->
-                    app.setAutoFreezeService(value)
-                    true
-                },
-                titleId = R.string.auto_freeze_after_lock,
-                icon = Icons.Outlined.ScreenLockPortrait
-            )
-            sliderPreference(
-                key = HailData.AUTO_FREEZE_DELAY,
-                defaultValue = 0f,
-                title = { Text(text = stringResource(R.string.auto_freeze_delay)) },
-                valueRange = 0f..30f,
-                valueSteps = 29,
-                enabled = { autoFreezeAfterLock.value },
-                icon = { Icon(imageVector = Icons.Outlined.LockClock, contentDescription = null) },
-                valueText = { Text(text = "%.0f".format(it)) },
-            )
-            switchPreference(
                 key = HailData.SKIP_WHILE_CHARGING,
                 defaultValue = false,
                 titleId = R.string.skip_while_charging,
-                enabled = autoFreezeAfterLock.value,
+                enabled = HailData.anyAutoFreezePolicy,
                 icon = Icons.Outlined.BatteryChargingFull
             )
             switchPreference(
@@ -218,7 +199,7 @@ class SettingsFragment : MainFragment(), MenuProvider {
                     } else true
                 },
                 titleId = R.string.skip_foreground_app,
-                enabled = autoFreezeAfterLock.value,
+                enabled = HailData.anyAutoFreezePolicy,
                 icon = Icons.Outlined.Android
             )
             switchPreference(
@@ -234,7 +215,7 @@ class SettingsFragment : MainFragment(), MenuProvider {
                     } else true
                 },
                 titleId = R.string.skip_notifying_app,
-                enabled = autoFreezeAfterLock.value,
+                enabled = HailData.anyAutoFreezePolicy,
                 icon = Icons.Outlined.NotificationsActive
             )
             horizontalDivider()
@@ -314,6 +295,12 @@ class SettingsFragment : MainFragment(), MenuProvider {
             )
             horizontalDivider()
             preferenceCategory(key = "shortcuts", title = { Text(text = stringResource(R.string.title_shortcuts)) })
+            switchPreference(
+                key = HailData.AUTO_SHORTCUT_NEW_APPS,
+                defaultValue = false,
+                titleId = R.string.auto_shortcut_new_apps,
+                icon = Icons.AutoMirrored.Outlined.AddToHomeScreen
+            )
             preference(
                 key = "add_pin_shortcut",
                 title = { Text(text = stringResource(R.string.action_add_pin_shortcut)) },
@@ -434,8 +421,8 @@ class SettingsFragment : MainFragment(), MenuProvider {
             .setItems(R.array.pin_shortcut_entries) { _, which ->
                 when (which) {
                     0 -> MaterialAlertDialogBuilder(requireActivity()).setTitle(R.string.action_freeze_tag)
-                        .setItems(HailData.tags.map { it.first }.toTypedArray()) { _, index ->
-                            val tag = HailData.tags[index].first
+                        .setItems(HailData.tags.map { it.name }.toTypedArray()) { _, index ->
+                            val tag = HailData.tags[index].name
                             HShortcuts.addPinShortcut(
                                 AppCompatResources.getDrawable(
                                     requireContext(), R.drawable.ic_round_frozen_shortcut
@@ -447,8 +434,8 @@ class SettingsFragment : MainFragment(), MenuProvider {
                         }.setNegativeButton(android.R.string.cancel, null).show()
 
                     1 -> MaterialAlertDialogBuilder(requireActivity()).setTitle(R.string.action_unfreeze_tag)
-                        .setItems(HailData.tags.map { it.first }.toTypedArray()) { _, index ->
-                            val tag = HailData.tags[index].first
+                        .setItems(HailData.tags.map { it.name }.toTypedArray()) { _, index ->
+                            val tag = HailData.tags[index].name
                             HShortcuts.addPinShortcut(
                                 AppCompatResources.getDrawable(
                                     requireContext(), R.drawable.ic_round_unfrozen_shortcut

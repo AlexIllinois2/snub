@@ -70,4 +70,8 @@
             </group>
         </menu>
     </item>
+    <item
+            android:id="@+id/action_add_shortcuts_silent"
+            android:title="@string/action_add_shortcuts_silent"
+            app:showAsAction="never"/>
 </menu>

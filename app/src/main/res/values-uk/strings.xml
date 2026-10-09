@@ -48,7 +48,6 @@
     <string name="app_slogan">Freezedom!</string>
     <string name="auto_freeze">Автозаморожування</string>
     <string name="auto_freeze_after_lock">Після блокування екрану</string>
-    <string name="auto_freeze_delay">Затримка заморозки (хвилини)</string>
     <string name="auto_freeze_notification_title">Запущено службу автозаморожування</string>
     <string name="compact_icon">Компактні іконки</string>
     <string name="donate_alipay">Alipay</string>

@@ -113,7 +113,6 @@
     <string name="action_clear_dynamic_shortcuts">Tøm alle dynamiske snarveier</string>
     <string name="auto_freeze">Auto-frysing</string>
     <string name="action_import_app">Importer program</string>
-    <string name="auto_freeze_delay">Frysningsforsinkelse (minutter)</string>
     <string name="skip_foreground_app">Hopp over forgrunnsprogram</string>
     <string name="synthesize_adaptive_icons">Syntetiser tilpassningsdyktige ikoner</string>
     <string name="action_unfreeze_tag">Tiningsetikett</string>

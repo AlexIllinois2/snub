@@ -11,7 +11,6 @@
     <string name="action_export_current">ஏற்றுமதி தெரியும்</string>
     <string name="action_export_all">அனைத்தையும் ஏற்றுமதி செய்யுங்கள்</string>
     <string name="skip_notifying_app">அறிவிக்கும் பயன்பாட்டைத் தவிர்க்கவும்</string>
-    <string name="auto_freeze_delay">முடக்கம் நேரந்தவறுகை (நிமிடங்கள்)</string>
     <string name="title_shortcuts">குறுக்குவழிகள்</string>
     <string name="msg_guide">பயன்பாடுகளை முடக்குவதற்கு முன், அமைப்புகளில் பணி பயன்முறையைத் தேர்ந்தெடுக்கவும்.</string>
     <string name="dynamic_shortcut_action">மாறும் குறுக்குவழி நடவடிக்கை</string>

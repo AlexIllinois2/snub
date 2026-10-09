@@ -104,7 +104,6 @@
     <string name="action_export_current">エクスポートを表示</string>
     <string name="action_export_all">すべてエクスポート</string>
     <string name="skip_notifying_app">通知を表示中のアプリをスキップする</string>
-    <string name="auto_freeze_delay">凍結遅延時間（分）</string>
     <string name="action_whitelist">ホワイトリストへ追加</string>
     <string name="action_remove_whitelist">ホワイトリストから削除</string>
     <string name="mode_owner_suspend">デバイス所有者 - サスペンド</string>

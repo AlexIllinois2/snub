@@ -27,14 +27,31 @@ object HWork {
     }
 
     fun setAutoFreeze(screenOff: Boolean) {
-        WorkManager.getInstance(app).enqueueUniqueWork(
-            HailApi.ACTION_FREEZE_ALL,
-            ExistingWorkPolicy.REPLACE,  // in case the old task has not been executed...
-            OneTimeWorkRequestBuilder<AutoFreezeWorker>().run {
-                if (screenOff) setInitialDelay(HailData.autoFreezeDelay, TimeUnit.MINUTES)
-                setInputData(workDataOf(HailData.ACTION_LOCK to screenOff))
-                build()
-            }
-        )
+        val workManager = WorkManager.getInstance(app)
+        if (!screenOff) {
+            workManager.enqueueUniqueWork(
+                HailApi.ACTION_FREEZE_ALL,
+                ExistingWorkPolicy.REPLACE,  // in case the old task has not been executed...
+                OneTimeWorkRequestBuilder<AutoFreezeWorker>().setInputData(
+                    workDataOf(HailData.ACTION_LOCK to false)
+                ).build()
+            )
+            return
+        }
+        // Screen off: schedule a worker for each tag with the lock policy.
+        HailData.tags.filter { it.autoFreezeLock }.forEach { tag ->
+            workManager.enqueueUniqueWork(
+                "${HailApi.ACTION_LOCK_FREEZE}_${tag.id}",
+                ExistingWorkPolicy.REPLACE,  // in case the old task has not been executed...
+                OneTimeWorkRequestBuilder<AutoFreezeWorker>()
+                    .setInitialDelay(tag.autoFreezeLockDelay.toLong(), TimeUnit.SECONDS)
+                    .setInputData(
+                        workDataOf(
+                            HailData.ACTION_LOCK to true,
+                            HailData.KEY_ID to tag.id
+                        )
+                    ).build()
+            )
+        }
     }
 }

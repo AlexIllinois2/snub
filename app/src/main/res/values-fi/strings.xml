@@ -128,7 +128,6 @@
     <string name="action_skip">Ohita</string>
     <string name="action_continue">Jatka</string>
     <string name="action_export_all">Vie kaikki</string>
-    <string name="auto_freeze_delay">Jäädytysviive (minuutteja)</string>
     <string name="freeze_system_app">Järjestelmäsovellusten jäädyttäminen tai asennuksen poistaminen voi aiheuttaa laitteen käynnistyssilmukan. Varmista, että tiedät mitä olet tekemässä ja varmuuskopioi tiedot etukäteen tai käytä palautusta, joka tukee tiedostonhallintaa.</string>
     <string name="action_freeze_non_whitelisted">Jäädyttää ei sallittujen luettelossa olevat</string>
     <string name="action_deselect">Peruuta valinta</string>

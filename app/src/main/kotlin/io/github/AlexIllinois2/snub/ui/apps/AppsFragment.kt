@@ -123,6 +123,16 @@ class AppsFragment : MainFragment(), AppsAdapter.OnItemClickListener, AppsAdapte
         return binding.root
     }
 
+    override fun onResume() {
+        super.onResume()
+        // Refresh on the first entry after MainActivity returns to the foreground,
+        // so newly installed apps show up without a manual refresh
+        if (cameToForeground) {
+            cameToForeground = false
+            updateAppList()
+        }
+    }
+
     override fun onItemClick(buttonView: CompoundButton) {
 //        buttonView.toggle()
     }
@@ -291,5 +301,11 @@ class AppsFragment : MainFragment(), AppsAdapter.OnItemClickListener, AppsAdapte
         appsAdapter.onDestroy()
         super.onDestroy()
         _binding = null
+    }
+
+    companion object {
+        // Set by MainActivity.onRestart when returning to the foreground,
+        // consumed on the next resume of the apps page
+        var cameToForeground = false
     }
 }

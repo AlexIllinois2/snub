@@ -128,7 +128,6 @@
     <string name="skip_while_charging">رد کردن هنگام شارژ</string>
     <string name="msg_biometric">با استفاده از بیومتریک خود وارد شوید</string>
     <string name="action_import_frozen">درون ریزی برنامه یخ زده</string>
-    <string name="auto_freeze_delay">تاخیر یخ زدن (دقیقه)</string>
     <string name="mode_dhizuku_suspend">دیزوکو - تعلیق</string>
     <string name="msg_guide">قبل از یخ زدن برنامه‌ها، لطفاً یک حالت کار را در تنظیمات انتخاب کنید.</string>
     <string name="action_unfreeze_tag">باز کردن برچسب</string>

@@ -107,7 +107,6 @@
     <string name="action_export_current">匯出可見</string>
     <string name="action_export_all">全部匯出</string>
     <string name="skip_notifying_app">跳過通知中的應用程式</string>
-    <string name="auto_freeze_delay">凍結延時 (分鐘)</string>
     <string name="mode_owner_suspend">裝置擁有者 - 暫停</string>
     <string name="mode_su_suspend">Root - 暫停</string>
     <string name="mode_shizuku_suspend">Shizuku - 暫停</string>

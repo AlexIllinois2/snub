@@ -34,8 +34,8 @@ class HailApp : Application() {
         }
     }
 
-    fun setAutoFreezeService(autoFreezeAfterLock: Boolean = HailData.autoFreezeAfterLock, context: Context = app) {
-        val start = autoFreezeAfterLock && HailData.checkedList.any {
+    fun setAutoFreezeService(context: Context = app) {
+        val start = HailData.anyAutoFreezePolicy && HailData.checkedList.any {
             it.packageName != packageName && it.applicationInfo != null && !AppManager.isAppFrozen(it.packageName) && !it.whitelisted
         }
         val intent = Intent(app, AutoFreezeService::class.java)

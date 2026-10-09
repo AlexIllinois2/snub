@@ -108,7 +108,6 @@
     <string name="action_export_current">Exportar visibles</string>
     <string name="action_export_all">Exportar todo</string>
     <string name="skip_notifying_app">Omitir aplicaciones con notificaciones</string>
-    <string name="auto_freeze_delay">Retraso de congelación (minutos)</string>
     <string name="action_remove_whitelist">Eliminar de la lista blanca</string>
     <string name="action_whitelist">Añadir a la lista blanca</string>
     <string name="mode_owner_suspend">Propietario del dispositivo - Suspender</string>

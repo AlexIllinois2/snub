@@ -91,7 +91,6 @@
     <string name="action_pin">Sematkan</string>
     <string name="action_remove_whitelist">Hapus dari daftar putih</string>
     <string name="action_import_frozen">Impor aplikasi dibekukan</string>
-    <string name="auto_freeze_delay">Tunda bekukan (menit)</string>
     <string name="app_name">Snub</string>
     <string name="action_deselect">Batalkan pilihan</string>
     <string name="nothing_here">Tidak ada apa-apa di sini</string>

@@ -102,7 +102,6 @@
     <string name="action_export_current">Eksportuj widoczne</string>
     <string name="action_export_all">Eksportuj wszystkie</string>
     <string name="skip_notifying_app">Pomiń aplikację powiadamiającą</string>
-    <string name="auto_freeze_delay">Opóźnienie zamrożenia (minuty)</string>
     <string name="title_shortcuts">Skróty</string>
     <string name="msg_guide">Proszę, wybierz tryb działania w ustawieniach, przed zamrożeniem aplikacji.</string>
     <string name="dynamic_shortcut_action">Akcja dynamicznego skrótu</string>

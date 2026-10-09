@@ -104,7 +104,6 @@
     <string name="action_export_current">Seçiliyi panoya aktar</string>
     <string name="action_export_all">Tümünü panoya aktar</string>
     <string name="skip_notifying_app">Bildirim gönderen uygulamaları atla</string>
-    <string name="auto_freeze_delay">Dondurma gecikmesi (dakika)</string>
     <string name="title_shortcuts">Kısayollar</string>
     <string name="msg_guide">Uygulamaları dondurmadan önce, lütfen ayarlardan bir çalışma yöntemi seçin.</string>
     <string name="dynamic_shortcut_action">Dinamik kısayol eylemi</string>

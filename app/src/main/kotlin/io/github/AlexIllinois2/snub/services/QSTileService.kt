@@ -8,7 +8,6 @@ import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import androidx.annotation.RequiresApi
-import io.github.AlexIllinois2.snub.HailApp.Companion.app
 import io.github.AlexIllinois2.snub.R
 import io.github.AlexIllinois2.snub.app.HailApi
 import io.github.AlexIllinois2.snub.app.HailData
@@ -23,12 +22,6 @@ class QSTileService : TileService() {
 
     override fun onClick() {
         super.onClick()
-        if (HailData.tileAction == HailData.AUTO_FREEZE_AFTER_LOCK) {
-            HailData.autoFreezeAfterLock = !HailData.autoFreezeAfterLock
-            app.setAutoFreezeService(context = this)
-            updateTile()
-            return
-        }
         val intent = Intent(
             when (HailData.tileAction) {
                 HailData.ACTION_FREEZE_ALL -> HailApi.ACTION_FREEZE_ALL
@@ -62,10 +55,10 @@ class QSTileService : TileService() {
                 else -> R.drawable.ic_round_frozen
             }
         )
-        qsTile.label =
-            resources.getStringArray(R.array.tile_action_entries)[HailData.TILE_ACTION_VALUES.indexOf(HailData.tileAction)]
-        qsTile.state =
-            if (HailData.tileAction != HailData.AUTO_FREEZE_AFTER_LOCK || HailData.autoFreezeAfterLock) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
+        qsTile.label = resources.getStringArray(R.array.tile_action_entries)[
+            HailData.TILE_ACTION_VALUES.indexOf(HailData.tileAction).coerceAtLeast(0)
+        ]
+        qsTile.state = Tile.STATE_ACTIVE
         qsTile.updateTile()
     }
 }

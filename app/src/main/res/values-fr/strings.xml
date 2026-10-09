@@ -130,7 +130,6 @@
     <string name="title_set_owner">Définir le propriétaire de l\'appareil</string>
     <string name="app_name">Snub</string>
     <string name="dynamic_shortcut_action">Action du raccourci dynamique</string>
-    <string name="auto_freeze_delay">Délai avant gel (minutes)</string>
     <string name="skip_notifying_app">Ignorer les notifications d\'application</string>
     <string name="filter_unfrozen_apps">Dégelées</string>
     <string name="fuzzy_search">Recherche floue</string>

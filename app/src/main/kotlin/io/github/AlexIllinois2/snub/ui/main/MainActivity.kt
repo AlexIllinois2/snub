@@ -21,6 +21,7 @@ import io.github.AlexIllinois2.snub.R
 import io.github.AlexIllinois2.snub.app.HailData
 import io.github.AlexIllinois2.snub.databinding.ActivityMainBinding
 import io.github.AlexIllinois2.snub.extensions.*
+import io.github.AlexIllinois2.snub.ui.apps.AppsFragment
 import io.github.AlexIllinois2.snub.utils.HPolicy
 import io.github.AlexIllinois2.snub.utils.HUI
 import com.google.android.material.appbar.AppBarLayout
@@ -89,6 +90,12 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menu?.let { MenuCompat.setGroupDividerEnabled(it, true) }
         return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        // Mark on returning to the foreground, so the first entry to the apps page refreshes the list
+        AppsFragment.cameToForeground = true
     }
 
     fun ownerRemoveDialog() {

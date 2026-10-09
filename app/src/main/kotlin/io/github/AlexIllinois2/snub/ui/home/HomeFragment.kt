@@ -28,7 +28,7 @@ class HomeFragment : MainFragment() {
         if (tags.size == 1) binding.tabs.isVisible = false
         binding.pager.adapter = HomeAdapter(this)
         TabLayoutMediator(binding.tabs, binding.pager) { tab, position ->
-            tab.text = tags[position].first
+            tab.text = tags[position].name
         }.attach()
         binding.tabs.applyDefaultInsetter { paddingRelative(isRtl, start = !activity.isLandscape, end = true) }
         return binding.root

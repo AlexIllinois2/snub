@@ -131,7 +131,6 @@
     <string name="msg_text_copied">Másolva: %s</string>
     <string name="auto_freeze">Automatikus fagyasztás</string>
     <string name="title_customize">Testreszabás</string>
-    <string name="auto_freeze_delay">Fagyasztási késleltetés (perc)</string>
     <string name="label_version">Verzió</string>
     <string name="msg_remove_owner">Ha a Hail-t eszköztulajdonosként eltávolítja, előfordulhat, hogy ezt követően nehéz lesz újraszervezni az alkalmazásokat.\nA fagyasztott alkalmazások a Hali eltávolítása után is fagyasztva maradnak, ezért kérjük figyelje arra, hogy a fontos alkalmazások fagyasztását szüntesse meg.</string>
     <string name="title_donate">Köszönöm!</string>

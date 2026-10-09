@@ -75,7 +75,6 @@
     <string name="action_export_current">موجودہ برآمد کریں</string>
     <string name="action_export_all">تمام برآمد کریں</string>
     <string name="skip_notifying_app">اطلاع دینے والی ایپ کو چھوڑیں</string>
-    <string name="auto_freeze_delay">منجمد تاخیر (منٹ)</string>
     <string name="title_shortcuts">شارٹ کٹس</string>
     <string name="msg_guide">ایپلیکیشنز کو منجمد کرنے سے پہلے، براہ کرم سیٹنگز میں ایک ورکنگ موڈ منتخب کریں۔</string>
     <string name="dynamic_shortcut_action">متحرک شارٹ کٹ ایکشن</string>

@@ -96,7 +96,6 @@
     <string name="nothing_here">Тут нічога няма</string>
     <string name="action_export_current">Экспарт бачны</string>
     <string name="skip_notifying_app">Прапусціць праграму з апавяшчэннем</string>
-    <string name="auto_freeze_delay">Затрымка замарожвання (хвіліны)</string>
     <string name="msg_guide">Перш чым замарожваць праграмы, абярыце рэжым працы ў наладах.</string>
     <string name="action_unfreeze_tag">Размарозіць тэг</string>
     <string name="action_select_all">Абраць усё</string>

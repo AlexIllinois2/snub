@@ -12,11 +12,14 @@ import io.github.AlexIllinois2.snub.utils.HSystem
 
 class AutoFreezeWorker(context: Context, params: WorkerParameters) : Worker(context, params) {
     override fun doWork(): Result {
+        val tagId = inputData.getInt(HailData.KEY_ID, -1)
         if ((inputData.getBoolean(HailData.ACTION_LOCK, true)
                     && HSystem.isInteractive(applicationContext))
             || isSkipWhileCharging(applicationContext)
         ) return Result.success() // Not stopping the AutoFreezeService here. The worker will run at some point. Then we'll stop the Service
-        val checkedList = HailData.checkedList.filter { !isSkipApp(applicationContext, it) }
+        val checkedList = HailData.checkedList.filter {
+            (tagId == -1 || it.tagId == tagId) && !isSkipApp(applicationContext, it)
+        }
         val result = AppManager.setListFrozen(true, *checkedList.toTypedArray())
         return if (result == null) {
             Result.failure()
