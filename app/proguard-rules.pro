@@ -25,3 +25,9 @@
 -keep,allowoptimization,allowobfuscation public class * extends io.github.libxposed.api.XposedModule {
     public <init>();
 }
+
+# app_process entry for root-assisted silent shortcuts;
+# invoked from a root shell by its fully qualified name
+-keep class io.github.AlexIllinois2.snub.utils.RootShortcutSender {
+    public static void main(java.lang.String[]);
+}

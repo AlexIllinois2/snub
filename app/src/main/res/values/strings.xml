@@ -36,7 +36,10 @@
     <string name="msg_shortcuts_requested">Requested shortcuts for %1$s apps</string>
     <string name="msg_shortcuts_none">No eligible apps. Only frozen apps with a launcher activity can be added.</string>
     <string name="action_add_shortcuts_silent">Add shortcuts for apps without one (silent)</string>
-    <string name="msg_add_silent_shortcuts">Silent home screen shortcuts will be created for %1$s apps, without confirmation dialogs. The launcher needs to support silent shortcut creation.</string>
+    <string name="action_add_shortcuts_interactively">Interactive add</string>
+    <string name="action_add_shortcuts_silently">Silent add</string>
+    <string name="msg_add_silent_shortcuts">Home screen shortcuts will be created for %1$s apps. Choose interactive adding (a confirmation dialog per app) or silent adding without dialogs, which needs launcher support.</string>
+    <string name="msg_silent_shortcuts_failed">Silent creation failed for %1$s apps. You can interactively add them instead.</string>
     <string name="msg_shortcuts_created">Created silent shortcuts for %1$s apps</string>
     <string name="action_export_clipboard">Export to Clipboard</string>
     <string name="action_import_clipboard">Import from Clipboard</string>

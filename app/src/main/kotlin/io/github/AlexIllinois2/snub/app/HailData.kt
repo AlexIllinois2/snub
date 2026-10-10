@@ -147,7 +147,6 @@ object HailData {
         ACTION_LOCK_FREEZE
     )
     const val AUTO_SHORTCUT_NEW_APPS = "auto_shortcut_new_apps"
-    const val SHORTCUT_CREATED_APPS = "shortcut_created_apps"
 
     private val sp = PreferenceManager.getDefaultSharedPreferences(app)
     val sortBy get() = sp.getString(SORT_BY, SORT_NAME)
@@ -177,18 +176,6 @@ object HailData {
     val lowBatteryNotifySeconds get() = sp.getFloat(LOW_BATTERY_NOTIFY_SECONDS, 30f).toLong()
     val dynamicShortcutAction get() = sp.getString(DYNAMIC_SHORTCUT_ACTION, ACTION_NONE)!!
     val autoShortcutNewApps get() = sp.getBoolean(AUTO_SHORTCUT_NEW_APPS, false)
-
-    fun isShortcutCreated(packageName: String): Boolean =
-        sp.getStringSet(SHORTCUT_CREATED_APPS, emptySet())?.contains(packageName) == true
-
-    fun addShortcutCreated(packageName: String) {
-        sp.edit {
-            putStringSet(
-                SHORTCUT_CREATED_APPS,
-                (sp.getStringSet(SHORTCUT_CREATED_APPS, emptySet()) ?: emptySet()) + packageName
-            )
-        }
-    }
 
     private val dir = "${app.filesDir.path}/v1"
     private val appsPath = "$dir/apps.json"

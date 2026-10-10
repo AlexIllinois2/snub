@@ -23,7 +23,9 @@
 - **应用仅限单个标签**：一个应用只能属于一个标签（原先可属于多个标签）。
 - **静默创建桌面快捷方式**：可开启「为新管理的应用自动创建快捷方式（静默）」，也可在首页右上角菜单一键为
   尚无快捷方式的受管应用批量静默创建快捷方式。静默创建通过传统 `INSTALL_SHORTCUT` 广播实现，无需逐个确认，
-  但需要桌面（启动器）支持静默创建。
+  但需要桌面（启动器）支持静默创建。由于 Android 8.0 起系统会静默丢弃 targetSdk ≥ 26 应用发送的该广播，
+  且现代启动器还可能以应用级权限（如「桌面快捷方式」）拦截，Root（或以 root 运行的 Shizuku）
+  工作模式下怠会改用 `app_process` 辅助进程以 root 身份发送广播，在仍支持该传统广播的启动器上绕过上述限制。
 - **CI 发布**：GitHub Actions 在推送标签时自动构建并将 APK 附加到 GitHub Release。
 
 <img src="fastlane/metadata/android/zh-CN/images/phoneScreenshots/1.png" width="32%" /> <img src="fastlane/metadata/android/zh-CN/images/phoneScreenshots/2.png" width="32%" /> <img src="fastlane/metadata/android/zh-CN/images/phoneScreenshots/3.png" width="32%" />

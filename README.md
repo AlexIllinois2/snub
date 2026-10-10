@@ -30,7 +30,10 @@ freeze Android apps. [GitHub Releases](https://github.com/AlexIllinois2/snub/rel
 - **Silent home screen shortcuts**: optionally create home screen shortcuts silently (no confirmation
   dialogs) for newly managed apps, or batch-create silent shortcuts for managed apps without one from
   the home menu. Silent creation relies on the legacy `INSTALL_SHORTCUT` broadcast, which requires
-  launcher support.
+  launcher support. Since Android 8.0 the system silently drops this broadcast from apps targeting
+  API 26+, and modern launchers gate it behind per-app permissions; under the Root (or Shizuku with
+  root) working mode, Snub instead delivers the broadcast as root via an `app_process` helper,
+  bypassing both restrictions on launchers that still support the legacy broadcast.
 - **CI releases**: GitHub Actions automatically builds and attaches an APK to a GitHub Release on tag push.
 
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="32%" /> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="32%" /> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width="32%" />
