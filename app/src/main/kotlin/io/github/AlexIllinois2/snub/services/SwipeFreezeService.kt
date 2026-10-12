@@ -92,15 +92,23 @@ class SwipeFreezeService : Service() {
         }
 
     private suspend fun CoroutineScope.pollLoop() {
-        seedCheckedApps()
+        var lastSeedAt = 0L
         var abnormalPolls = 0
         while (isActive) {
             delay(pollIntervalMillis)
+            // Re-seed periodically: apps launched directly from the launcher (clearing their
+            // stopped state, e.g. with the "stop" working mode) bypass setAppFrozen and would
+            // otherwise never be tracked for swipe-away freezing.
+            val now = System.currentTimeMillis()
+            if (now - lastSeedAt >= RESEED_INTERVAL_MILLIS) {
+                seedCheckedApps()
+                lastSeedAt = now
+            }
             val snapshot = TempUnfrozenList.snapshot()
             if (snapshot.isEmpty()) continue
 
-            val recents = HShell.execute(DUMP_RECENTS_COMMAND, true).second.orEmpty()
-            if (recents.isBlank()) {
+            val dump = HShell.execute(DUMP_RECENTS_COMMAND, true).second.orEmpty()
+            if (dump.isBlank()) {
                 // dumpsys keeps returning nothing: the ROM may be incompatible, stop before misfreezing.
                 if (++abnormalPolls >= ABNORMAL_POLLS_LIMIT) {
                     HUI.showToast(R.string.swipe_freeze_abnormal, isLengthLong = true)
@@ -111,8 +119,18 @@ class SwipeFreezeService : Service() {
             }
             abnormalPolls = 0
 
-            val now = System.currentTimeMillis()
+            // Android 14+ keeps swiped-away tasks in `mHiddenTasks` (still printed by dumpsys),
+            // so matching the whole dump would treat swiped-away apps as "still in recents" and
+            // never freeze them. Match live task entries only.
+            val recents = dump.toLiveTaskText()
+
             snapshot.forEach { (packageName, unfrozenAt) ->
+                // Purge entries of apps that are no longer managed (unchecked or whitelisted
+                // after being unfrozen), so unchecking an app always stops its auto freezing.
+                if (!HailData.isChecked(packageName) || HailData.isWhitelisted(packageName)) {
+                    TempUnfrozenList.remove(packageName)
+                    return@forEach
+                }
                 if (now - unfrozenAt < (HailData.swipeFreezeDelay * 1000).toLong()) return@forEach
                 if (!recents.containsPackage(packageName)) freezeApp(packageName)
             }
@@ -136,7 +154,8 @@ class SwipeFreezeService : Service() {
 
     private companion object {
         const val NOTIFICATION_ID = 101
-        const val ABNORMAL_POLLS_LIMIT = 3
+        const val ABNORMAL_POLLS_LIMIT = 30
+        const val RESEED_INTERVAL_MILLIS = 30_000L
         const val IDLE_INTERVAL_FACTOR = 10
         const val DUMP_RECENTS_COMMAND = "dumpsys activity recents"
     }
@@ -146,7 +165,6 @@ class SwipeFreezeService : Service() {
      * restarts): a root watchdog loop revives it within seconds. It is root-only, as is this service.
      */
     private fun startWatchdog() {
-        if (!HailData.workingMode.startsWith(HailData.SU)) return
         HShell.execute("touch '$watchdogMarker'", true)
         // `hail_[w]d` never matches this check's own command line, unlike a plain `hail_wd`.
         if (HShell.execute("pgrep -f hail_[w]d", true).second.isNullOrBlank()) HShell.spawnRoot(
@@ -160,7 +178,6 @@ class SwipeFreezeService : Service() {
     }
 
     private fun stopWatchdog() {
-        if (!HailData.workingMode.startsWith(HailData.SU)) return
         HShell.execute("rm -f '$watchdogMarker'", true) // The watchdog exits when it sees this
     }
 
@@ -181,3 +198,26 @@ private fun String.containsPackage(packageName: String): Boolean {
 }
 
 private fun Char.isPackageChar(): Boolean = isLetterOrDigit() || this == '.' || this == '_'
+
+/**
+ * Extracts the text of live task entries (`* Recent #N: Task{...}` blocks on newer Androids,
+ * `*Task{...}` blocks on older ones) from a `dumpsys activity recents` dump.
+ * Everything else (e.g. the Android 14+ `mHiddenTasks` list of swiped-away tasks) is dropped,
+ * so packages mentioned there are no longer treated as present in recents.
+ */
+private fun String.toLiveTaskText(): String {
+    val live = StringBuilder()
+    var taskIndent = -1
+    lineSequence().forEach { line ->
+        val trimmed = line.trimStart()
+        when {
+            trimmed.startsWith("*") -> { // Task entry header: `* Recent #N: Task{` or `*Task{`
+                taskIndent = line.length - trimmed.length
+                live.appendLine(line)
+            }
+            taskIndent >= 0 && line.length - trimmed.length > taskIndent -> live.appendLine(line)
+            else -> taskIndent = -1 // Non-indented line: the task block has ended
+        }
+    }
+    return live.toString()
+}

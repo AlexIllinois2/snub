@@ -44,24 +44,28 @@ object HPackages {
         else app.packageManager.getApplicationInfo(packageName, flags)
     }.getOrNull()
 
-    fun isAppDisabled(packageName: String): Boolean = getApplicationInfoOrNull(packageName)?.enabled?.not() ?: false
+    fun isAppDisabled(info: ApplicationInfo): Boolean = !info.enabled
 
-    fun isAppHidden(packageName: String): Boolean = getApplicationInfoOrNull(packageName)?.let {
-        (ApplicationInfo::class.java.getField("privateFlags").get(it) as Int) and 1 == 1
-    } ?: false
+    fun isAppDisabled(packageName: String): Boolean =
+        getApplicationInfoOrNull(packageName)?.let(::isAppDisabled) ?: false
+
+    fun isAppHidden(info: ApplicationInfo): Boolean =
+        (ApplicationInfo::class.java.getField("privateFlags").get(info) as Int) and 1 == 1
+
+    fun isAppHidden(packageName: String): Boolean =
+        getApplicationInfoOrNull(packageName)?.let(::isAppHidden) ?: false
+
+    fun isAppStopped(info: ApplicationInfo): Boolean =
+        info.flags and ApplicationInfo.FLAG_STOPPED == ApplicationInfo.FLAG_STOPPED
 
     fun isAppStopped(packageName: String): Boolean =
-        getApplicationInfoOrNull(packageName)?.run { flags and ApplicationInfo.FLAG_STOPPED == ApplicationInfo.FLAG_STOPPED }
-            ?: false
+        getApplicationInfoOrNull(packageName)?.let(::isAppStopped) ?: false
 
-    fun isAppSuspended(packageName: String): Boolean = getApplicationInfoOrNull(packageName)?.let {
-        when {
-//            This method will cause NameNotFoundException with uninstalled packages
-//            HTarget.Q -> app.packageManager.isPackageSuspended(packageName)
-            HTarget.N -> it.flags and ApplicationInfo.FLAG_SUSPENDED == ApplicationInfo.FLAG_SUSPENDED
-            else -> false
-        }
-    } ?: false
+    fun isAppSuspended(info: ApplicationInfo): Boolean =
+        HTarget.N && info.flags and ApplicationInfo.FLAG_SUSPENDED == ApplicationInfo.FLAG_SUSPENDED
+
+    fun isAppSuspended(packageName: String): Boolean =
+        getApplicationInfoOrNull(packageName)?.let(::isAppSuspended) ?: false
 
     fun isAppUninstalled(packageName: String): Boolean =
         getApplicationInfoOrNull(packageName)?.run { flags and ApplicationInfo.FLAG_INSTALLED != ApplicationInfo.FLAG_INSTALLED }

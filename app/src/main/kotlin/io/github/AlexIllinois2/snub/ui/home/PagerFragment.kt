@@ -2,6 +2,7 @@ package io.github.AlexIllinois2.snub.ui.home
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.Settings
@@ -74,7 +75,8 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
     private val selectedList get() = (parentFragment as HomeFragment).selectedList
     private val tabs: TabLayout? get() = (parentFragment as? HomeFragment)?.binding?.tabs
     private val adapter: HomeAdapter? get() = (parentFragment as? HomeFragment)?.binding?.pager?.adapter as? HomeAdapter
-    private val tag: Tag? get() = tabs?.let { HailData.tags.getOrNull(it.selectedTabPosition) }
+    private val tag: Tag? get() = tabs?.let { HailData.displayTags.getOrNull(it.selectedTabPosition) }
+    private val frozenTab: Boolean get() = tag?.id == HailData.FROZEN_TAB_ID
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -126,12 +128,13 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
         activity.appbar.setLiftOnScrollTargetView(binding.recyclerView)
         tabs?.let { tabLayout ->
             tabLayout.getTabAt(tabLayout.selectedTabPosition)?.view?.setOnLongClickListener {
-                if (isResumed) showTagDialog()
+                if (isResumed && !frozenTab) showTagDialog()
                 true
             }
         }
         activity.fab.setOnClickListener {
-            setListFrozen(true, pagerAdapter.currentList.filterNot { it.whitelisted })
+            if (frozenTab) setListFrozen(false, pagerAdapter.currentList)
+            else setListFrozen(true, pagerAdapter.currentList.filterNot { it.whitelisted })
         }
         activity.fab.setOnLongClickListener {
             setListFrozen(true)
@@ -139,17 +142,35 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
         }
     }
 
-    private fun updateCurrentList() = HailData.checkedList.filter {
+    private fun updateCurrentList() = (if (frozenTab) frozenList() else HailData.checkedList.filter {
         if (query.isEmpty()) it.tagId == tag?.id
         else ((HailData.nineKeySearch && NineKeySearch.search(
             query, it.packageName, it.name.toString()
         )) || FuzzySearch.search(it.packageName, query) || FuzzySearch.search(
             it.name.toString(), query
         ) || PinyinSearch.searchPinyinAll(it.name.toString(), query))
-    }.sortedWith(NameComparator).let {
+    }).sortedWith(NameComparator).let {
         binding.empty.isVisible = it.isEmpty()
         pagerAdapter.submitList(it)
         app.setAutoFreezeService()
+    }
+
+    /**
+     * Every app currently frozen under the working mode, managed or not, so that
+     * apps can always be seen and unfrozen here no matter which tool froze them.
+     */
+    private fun frozenList(): List<AppInfo> {
+        val managed = HailData.checkedList.associateBy { it.packageName }
+        return HPackages.getInstalledApplications().asSequence().filter {
+            it.flags and ApplicationInfo.FLAG_INSTALLED != 0
+                    && it.packageName != BuildConfig.APPLICATION_ID && AppManager.isAppFrozen(it)
+        }.map { managed[it.packageName] ?: AppInfo(it.packageName) }.filter {
+            query.isEmpty() || ((HailData.nineKeySearch && NineKeySearch.search(
+                query, it.packageName, it.name.toString()
+            )) || FuzzySearch.search(it.packageName, query) || FuzzySearch.search(
+                it.name.toString(), query
+            ) || PinyinSearch.searchPinyinAll(it.name.toString(), query))
+        }.toList()
     }
 
     private fun updateBarTitle() {
@@ -171,6 +192,12 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
                 .setAction(R.string.action_remove_home) { removeCheckedApp(info.packageName) }.show()
             return
         }
+        if (frozenTab && !HailData.isChecked(info.packageName)) {
+            // Unmanaged frozen app: unfreezing is all we are allowed to do.
+            if (AppManager.setAppFrozen(info.packageName, false)) updateCurrentList()
+            else HUI.showToast(R.string.permission_denied)
+            return
+        }
         launchApp(info.packageName)
     }
 
@@ -184,6 +211,20 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
             return true
         }
         val pkg = info.packageName
+        if (frozenTab && !HailData.isChecked(pkg)) {
+            // Unmanaged frozen app: unfreezing is all we are allowed to do.
+            MaterialAlertDialogBuilder(activity).setTitle(info.name).setItems(
+                arrayOf(getString(R.string.action_unfreeze))
+            ) { _, _ ->
+                if (AppManager.setAppFrozen(pkg, false)) updateCurrentList()
+                else HUI.showToast(R.string.permission_denied)
+            }.setNeutralButton(R.string.action_details) { _, _ ->
+                HUI.startActivity(
+                    Settings.ACTION_APPLICATION_DETAILS_SETTINGS, HPackages.packageUri(pkg)
+                )
+            }.setNegativeButton(android.R.string.cancel, null).show()
+            return true
+        }
         val frozen = AppManager.isAppFrozen(pkg)
         val action = getString(if (frozen) R.string.action_unfreeze else R.string.action_freeze)
         MaterialAlertDialogBuilder(activity).setTitle(info.name).setItems(
@@ -252,8 +293,11 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
                 7 -> exportToClipboard(listOf(info))
                 8 -> removeCheckedApp(pkg)
                 9 -> {
-                    setListFrozen(false, listOf(info), false)
-                    if (!AppManager.isAppFrozen(pkg)) removeCheckedApp(pkg)
+                    // Remove from management first, to keep the swipe-freeze service away,
+                    // then unfreeze so the app cannot be auto-frozen again.
+                    removeCheckedApp(pkg, false)
+                    HailData.saveApps()
+                    setListFrozen(false, listOf(info))
                 }
             }
         }.setNeutralButton(R.string.action_details) { _, _ ->
@@ -328,12 +372,19 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
                 }
 
                 5 -> {
-                    setListFrozen(false, selectedList, false)
-                    selectedList.forEach {
-                        if (!AppManager.isAppFrozen(it.packageName)) removeCheckedApp(it.packageName, false)
+                    val apps = selectedList.toList()
+                    viewLifecycleOwner.lifecycleScope.launch {
+                        HBatch.run(
+                            requireActivity(), apps, R.string.action_unfreeze, label = { it.name }
+                        ) {
+                            // Remove from management first, then unfreeze, so the
+                            // swipe-freeze service cannot interfere in between.
+                            HailData.removeCheckedApp(it.packageName, false)
+                            AppManager.setAppFrozen(it.packageName, false)
+                        }
+                        HailData.saveApps()
+                        if (_binding != null) deselect()
                     }
-                    HailData.saveApps()
-                    deselect()
                 }
 
                 6 -> {
@@ -476,9 +527,6 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
         if (AppManager.isAppFrozen(packageName) && AppManager.setAppFrozen(packageName, false)) {
             updateCurrentList()
         }
-        if (HailData.workingMode == HailData.MODE_ISLAND_HIDE) {
-            HIsland.ensureLaunchIntentExists(packageName)
-        }
         app.packageManager.getLaunchIntentForPackage(packageName)?.let {
             HShortcuts.addDynamicShortcut(packageName)
             startActivity(it)
@@ -488,28 +536,22 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
     private fun setListFrozen(
         frozen: Boolean, list: List<AppInfo> = HailData.checkedList, updateList: Boolean = true
     ) {
-        if (HailData.workingMode == HailData.MODE_DEFAULT) {
-            MaterialAlertDialogBuilder(activity).setMessage(R.string.msg_guide)
-                .setPositiveButton(android.R.string.ok, null).show()
-            return
-        } else if (HailData.workingMode == HailData.MODE_SHIZUKU_HIDE) {
-            runCatching { HShizuku.isRoot }.onSuccess {
-                if (!it) {
-                    MaterialAlertDialogBuilder(activity).setMessage(R.string.shizuku_hide_adb)
-                        .setPositiveButton(android.R.string.ok, null).show()
-                    return
-                }
-            }
-        }
-        val filtered = list.filter { AppManager.isAppFrozen(it.packageName) != frozen }
-        when (val result = AppManager.setListFrozen(frozen, *filtered.toTypedArray())) {
-            null -> HUI.showToast(R.string.permission_denied)
-            else -> {
-                if (updateList) updateCurrentList()
-                HUI.showToast(
-                    if (frozen) R.string.msg_freeze else R.string.msg_unfreeze, result
-                )
-            }
+        val filtered =
+            list.filter { it.packageName != BuildConfig.APPLICATION_ID && AppManager.isAppFrozen(it.packageName) != frozen }
+        viewLifecycleOwner.lifecycleScope.launch {
+            val result = HBatch.run(
+                requireActivity(), filtered,
+                if (frozen) R.string.action_freeze else R.string.action_unfreeze,
+                label = { it.name }
+            ) { AppManager.setAppFrozen(it.packageName, frozen) }
+            if (_binding == null) return@launch
+            if (result.succeeded == 0 && result.failed > 0) HUI.showToast(R.string.permission_denied)
+            else HUI.showToast(
+                if (frozen) R.string.msg_freeze else R.string.msg_unfreeze,
+                if (result.succeeded == 1) result.lastSucceeded else result.succeeded.toString()
+            )
+            if (updateList) updateCurrentList()
+            app.setAutoFreezeService()
         }
     }
 
@@ -521,7 +563,11 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
     private fun showTagDialog(list: List<AppInfo>? = null) {
         val tabLayout = tabs ?: return  // The view has been destroyed; return directly.
         val homeAdapter = adapter ?: return
-        val currentTag = if (list == null) HailData.tags.getOrNull(tabLayout.selectedTabPosition) else null
+        // Tab position 0 is the virtual frozen tab, which is not a tag to edit.
+        val tabPosition = tabLayout.selectedTabPosition
+        val tagIndex = tabPosition - 1 // Index into HailData.tags
+        if (list == null && tagIndex < 0) return
+        val currentTag = if (list == null) HailData.tags.getOrNull(tagIndex) else null
 
         val bgState = mutableStateOf(currentTag?.autoFreezeBackground ?: false)
         val bgDelayState = mutableStateOf(currentTag?.autoFreezeBackgroundDelay ?: 0f)
@@ -563,13 +609,12 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
                 val newName = nameEditText.text?.toString() ?: String()
                 if (newName.isBlank()) return@setPositiveButton
                 if (list == null) { // Edit tag
-                    val position = tabLayout.selectedTabPosition
-                    val defaultTab = position == 0
+                    val defaultTab = currentTag!!.id == 0
                     val newId = if (defaultTab) 0 else newName.hashCode()
                     if (HailData.tags.any { it !== currentTag && (it.name == newName || it.id == newId) }) {
                         return@setPositiveButton
                     }
-                    val oldId = currentTag!!.id
+                    val oldId = currentTag.id
                     currentTag.name = newName
                     if (!defaultTab) {
                         HailData.checkedList.forEach { if (it.tagId == oldId) it.tagId = newId }
@@ -581,8 +626,8 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
                     currentTag.autoFreezeLockDelay = lockDelayState.value
                     HailData.saveApps()
                     HailData.saveTags()
-                    homeAdapter.notifyItemChanged(position)
-                    tabLayout.getTabAt(position)?.text = newName
+                    homeAdapter.notifyItemChanged(tabPosition)
+                    tabLayout.getTabAt(tabPosition)?.text = newName
                     app.setAutoFreezeService()
                 } else { // Add tag
                     val tagId = newName.hashCode()
@@ -593,20 +638,17 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
                         )
                     )
                     homeAdapter.notifyItemInserted(homeAdapter.itemCount - 1)
-                    if (query.isEmpty() && tabLayout.tabCount == 2) tabLayout.isVisible = true
                     HailData.saveTags()
                     app.setAutoFreezeService()
                     if (list == selectedList) singleTagDialog() else tagDialog(list.first())
                 }
             }.apply {
-                if (list == null && tabLayout.selectedTabPosition != 0) {
+                if (list == null && tagIndex > 0) {
                     setNeutralButton(R.string.action_tag_remove) { _, _ ->
-                        val position = tabLayout.selectedTabPosition
-                        val removedId = HailData.tags[position].id
+                        val removedId = HailData.tags[tagIndex].id
                         HailData.checkedList.forEach { if (it.tagId == removedId) it.tagId = 0 }
-                        HailData.tags.removeAt(position)
-                        homeAdapter.notifyItemRemoved(position)
-                        if (tabLayout.tabCount == 1) tabLayout.isVisible = false
+                        HailData.tags.removeAt(tagIndex)
+                        homeAdapter.notifyItemRemoved(tabPosition)
                         HailData.saveApps()
                         HailData.saveTags()
                         app.setAutoFreezeService()
@@ -712,7 +754,7 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
         for (index in 0 until json.length()) {
             val pkg = json.getString(index)
             if (HPackages.getApplicationInfoOrNull(pkg) != null && !HailData.isChecked(pkg)) {
-                HailData.addCheckedApp(pkg, tag?.id ?: 0, false)
+                HailData.addCheckedApp(pkg, tag?.id?.takeIf { it != HailData.FROZEN_TAB_ID } ?: 0, false)
                 i++
             }
         }
@@ -724,9 +766,10 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
     }
 
     private suspend fun importFrozenApp() = withContext(Dispatchers.IO) {
+        val tagId = tag?.id?.takeIf { it != HailData.FROZEN_TAB_ID } ?: 0
         HPackages.getInstalledApplications().map { it.packageName }
             .filter { AppManager.isAppFrozen(it) && !HailData.isChecked(it) }
-            .onEach { HailData.addCheckedApp(it, tag?.id ?: 0, false) }.size
+            .onEach { HailData.addCheckedApp(it, tagId, false) }.size
     }
 
     private fun removeCheckedApp(packageName: String, saveApps: Boolean = true) {
@@ -789,7 +832,7 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
                 if (inited) {
                     query = newText
                     tabs?.run {
-                        isVisible = query.isEmpty() && tabCount > 1
+                        isVisible = query.isEmpty()
                     }
                     updateCurrentList()
                 } else inited = true

@@ -1,33 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Snub</string>
-    <string name="msg_remove_owner">Se o Hail for removido como proprietário do dispositivo, poderá haver dificuldades para reorganizar os aplicativos após a remoção do Hail.
-\nOs aplicativos congelados permanecerão congelados após a remoção. Certifique-se de descongelar os aplicativos importantes.</string>
     <string name="msg_freeze">Congelado: %s</string>
     <string name="action_whitelist">Adicionar à lista de permissões</string>
     <string name="synthesize_adaptive_icons">Sintetizar ícones adaptativos</string>
     <string name="title_customize">Customizar</string>
     <string name="action_unpin">Unpin</string>
-    <string name="title_remove_owner">Remover proprietário do dispositivo</string>
     <string name="action_deselect">Desmarcar</string>
     <string name="msg_unfreeze">Descongelar: %s</string>
     <string name="action_remove_home">Remover da tela inicial</string>
     <string name="action_deferred_task">Tarefa adiada</string>
     <string name="action_unfreeze_tag">Tag de descongelamento</string>
     <string name="msg_uninstall">Deseja desinstalar este aplicativo\?</string>
-    <string name="mode_owner_suspend">Proprietário do dispositivo - Suspenso</string>
-    <string name="mode_dhizuku_suspend">Dhizuku - Suspenso</string>
     <string name="action_clear_dynamic_shortcuts">Limpe todos os atalhos dinâmicos</string>
-    <string name="mode_default">Ausente</string>
     <string name="action_import_app">Importar app</string>
     <string name="action_import_clipboard">Importar da área de transferência</string>
-    <string name="shizuku_missing">Shizuku desapareceu :(</string>
     <string name="msg_exported">Exportado: %s</string>
     <string name="msg_text_copied">Copiado: %s</string>
     <string name="donate_liberapay">Liberapay</string>
     <string name="skip_foreground_app">Ignorar app em primeiro plano</string>
     <string name="icon_pack">Pacote de ícones</string>
-    <string name="mode_owner_hide">Proprietário do dispositivo - Oculto</string>
     <string name="working_mode">Modo de trabalho</string>
     <string name="sort_name">Nome</string>
     <string name="auto_freeze_notification_title">O serviço de auto congelamento está em execução</string>
@@ -38,8 +30,6 @@
     <string name="tap_to_select">Toque para seleção múltipla</string>
     <string name="filter_user_apps">Usuário</string>
     <string name="nothing_here">Nada aqui</string>
-    <string name="msg_set_owner">Emita o comando do adb:
-\n%s</string>
     <string name="action_none">Nenhum</string>
     <string name="action_lock_freeze">Bloquear e congelar</string>
     <string name="action_import_frozen">Importar app congelado</string>
@@ -70,7 +60,6 @@
     <string name="title_donate">Obrigado!</string>
     <string name="compact_icon">Ícone compacto</string>
     <string name="action_uninstall">Desinstalar</string>
-    <string name="mode_dhizuku_hide">Dhizuku – Oculto</string>
     <string name="action_extract_apk">Extrair APK</string>
     <string name="action_freeze_tag">Tag de congelamento</string>
     <string name="action_select_all">Selecionar tudo</string>
@@ -81,7 +70,6 @@
     <string name="filter_by">Filtro</string>
     <string name="operation_failed">Falha na operação: %s</string>
     <string name="action_add_pin_shortcut">Adicionar à tela inicial</string>
-    <string name="mode_shizuku_hide">Shizuku - Oculto</string>
     <string name="action_launch">Iniciar</string>
     <string name="action_tag_add">Adicionar tag</string>
     <string name="donate_alipay">Alipay</string>
@@ -89,7 +77,6 @@
     <string name="filter_system_apps">Sistema</string>
     <string name="sort_install">Primeira instalação</string>
     <string name="action_tag_remove">Remover tag</string>
-    <string name="mode_shizuku_suspend">Shizuku – Suspenso</string>
     <string name="mode_su_suspend">Root - Suspenso</string>
     <plurals name="deferred_task_entry">
         <item quantity="one">%d minuto</item>
@@ -98,7 +85,6 @@
     </plurals>
     <string name="action_fdroid">F-Droid</string>
     <string name="action_lock">Bloquear</string>
-    <string name="msg_guide">Antes de congelar aplicativos, selecione um modo de funcionamento nas configurações.</string>
     <string name="sort_update">Última atualização</string>
     <string name="action_unfreeze">Descongelar</string>
     <string name="donate_wechat">WeChat Pay</string>
@@ -112,7 +98,6 @@
     <string name="title_home">Início</string>
     <string name="action_licenses">Licenças</string>
     <string name="action_translate">Traduzir</string>
-    <string name="mode_shizuku_disable">Shizuku – Desativado</string>
     <string name="action_donate">Doar</string>
     <string name="label_time">Tempo de instalação</string>
     <string name="action_github">GitHub</string>
@@ -120,7 +105,6 @@
     <string name="title_settings">Configurações</string>
     <string name="label_version">Versão</string>
     <string name="title_apps">Apps</string>
-    <string name="title_set_owner">Definir proprietário do dispositivo</string>
     <string name="action_freeze_current">Congelar o visível</string>
     <string name="msg_extract_apk">Extraído para: %s</string>
     <string name="action_freeze_non_whitelisted">Congelar não incluído na lista de permissões</string>
@@ -132,18 +116,12 @@
     <string name="donate_wechat_scan">Escanear</string>
     <string name="action_remove_whitelist">Remover da lista de permissões</string>
     <string name="action_skip">Pular</string>
-    <string name="mode_island_hide">Island/Insular - Ocultar</string>
-    <string name="mode_island_suspend">Island/Insular - Suspender</string>
     <string name="tag">Tag</string>
-    <string name="mode_privapp_disable">Apps do Sistema - Desabilitar</string>
     <string name="freeze_system_app">Congelar ou desinstalar aplicativos do sistema pode fazer com que o dispositivo entre em bootloop. Certifique-se de saber o que está fazendo e faça backup dos seus dados com antecedência ou use recuperação que suporte gerenciamento de arquivos.</string>
     <string name="fuzzy_search">Pesquisa Fuzzy</string>
-    <string name="shizuku_hide_adb">Shizuku está rodando como adb. Para ocultar apps, reinicie Shizuku com root.</string>
     <string name="command">Comando</string>
     <string name="action_continue">Continuar</string>
     <string name="home_font_size">Tamanho da fonte inicial</string>
-    <string name="mode_shizuku_stop">Shizuku - Forçar Parada</string>
-    <string name="mode_privapp_stop">Apps do Sistema - Forçar Parada</string>
     <string name="mode_su_stop">Root - Forçar Parada</string>
     <string name="action_reinstall">Reinstalar</string>
     <string name="nine_key">Pesquisa T9</string>

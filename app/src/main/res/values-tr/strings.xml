@@ -38,13 +38,7 @@
     <string name="working_mode">Çalışma yöntemi</string>
     <string name="mode_su_disable">Root - Devre dışı bırak</string>
     <string name="mode_su_suspend">Root - Askıya al</string>
-    <string name="mode_shizuku_disable">Shizuku - Devre dışı bırak</string>
-    <string name="mode_default">Yok</string>
     <string name="action_translate">Çeviri</string>
-    <string name="mode_shizuku_hide">Shizuku - Gizle</string>
-    <string name="mode_shizuku_suspend">Shizuku - Askıya al</string>
-    <string name="title_set_owner">Cihaz yöneticisi ayarla</string>
-    <string name="title_remove_owner">Cihaz Yöneticisini Kaldır</string>
     <string name="tap_to_select">Çoklu seçim için tıkla</string>
     <string name="filter_by">Filtrele</string>
     <string name="filter_user_apps">Kullanıcı</string>
@@ -83,8 +77,6 @@
     <string name="tile_action">Hızlı ayar kutusu eylemi</string>
     <string name="auto_freeze">Otomatik dondur</string>
     <string name="auto_freeze_notification_title">Otomatik dondurma hizmeti çalışıyor</string>
-    <string name="msg_set_owner">adb komutu hatalı:
-\n%s</string>
     <string name="synthesize_adaptive_icons">Uyarlanabilir simgeler kullan</string>
     <string name="auto_freeze_after_lock">Ekran kilitlendikten sonra</string>
     <string name="skip_while_charging">Şarjdayken atla</string>
@@ -105,7 +97,6 @@
     <string name="action_export_all">Tümünü panoya aktar</string>
     <string name="skip_notifying_app">Bildirim gönderen uygulamaları atla</string>
     <string name="title_shortcuts">Kısayollar</string>
-    <string name="msg_guide">Uygulamaları dondurmadan önce, lütfen ayarlardan bir çalışma yöntemi seçin.</string>
     <string name="dynamic_shortcut_action">Dinamik kısayol eylemi</string>
     <string name="action_none">Hiçbiri</string>
     <string name="action_freeze_tag">Etiketlileri dondur</string>
@@ -118,30 +109,17 @@
     <string name="action_freeze">Dondur</string>
     <string name="action_qq">QQ Grubu</string>
     <string name="action_details">Uygulama bilgisi</string>
-    <string name="mode_owner_hide">Cihaz Yöneticisi - Gizle</string>
-    <string name="msg_remove_owner">Cihaz Yöneticisi kaldırılacak, kaldırdıktan sonra yeniden ayarlamak zor olabilir.
-\n Dondurulmuş uygulamalar, kaldırıldıktan sonra da donuk olarak kalır, önemli uygulamaların çözülmüş olduğundan emin olun.</string>
     <string name="activity_not_found">Başlatma etkinliği bulunamadı</string>
-    <string name="shizuku_missing">Shizuku kayıp :(</string>
-    <string name="mode_owner_suspend">Cihaz Yöneticisi - Askıya Al</string>
     <string name="action_terminal">Terminal</string>
-    <string name="mode_dhizuku_suspend">Dhizuku - Askıya al</string>
-    <string name="mode_dhizuku_hide">Dhizuku - Gizle</string>
     <string name="action_skip">Atla</string>
-    <string name="mode_island_hide">Island/Insular - Gizle</string>
-    <string name="mode_island_suspend">Island/Insular - Askıya al</string>
     <string name="mode_su_hide">Root - Gizle</string>
     <string name="action_fdroid">F-Droid</string>
-    <string name="shizuku_hide_adb">Shizuku adb olarak çalışıyor. Uygulamaları gizlemek için lütfen Shizuku\'yu root ile yeniden başlatın.</string>
     <string name="command">Komut</string>
     <string name="tag">Etiket</string>
     <string name="action_continue">Devam et</string>
     <string name="nine_key">T9 Arama</string>
     <string name="home_font_size">Ana ekran yazı tipi boyutu</string>
     <string name="freeze_system_app">Sistem uygulamalarının dondurulması veya kaldırılması önyükleme döngüsüne girmesine neden olabilir. Ne yaptığınızı bildiğinizden emin olun, verilerinizi önceden yedekleyin veya dosya yönetimini destekleyen kurtarma kullanın.</string>
-    <string name="mode_privapp_disable">Sistem Uygulaması - Devre Dışı Bırak</string>
-    <string name="mode_shizuku_stop">Shizuku - Durdurmaya Zorla</string>
-    <string name="mode_privapp_stop">Sistem Uygulaması - Durdurmaya Zorla</string>
     <string name="mode_su_stop">Root - Durdurmaya Zorla</string>
     <string name="action_reinstall">Yeniden yükle</string>
     <string name="fuzzy_search">Yaklaşık Arama</string>

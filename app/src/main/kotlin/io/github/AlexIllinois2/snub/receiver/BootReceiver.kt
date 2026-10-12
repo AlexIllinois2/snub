@@ -11,7 +11,6 @@ import io.github.AlexIllinois2.snub.services.SwipeFreezeService
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action != Intent.ACTION_BOOT_COMPLETED) return
-        if (!HailData.workingMode.startsWith(HailData.SU)) return
         if (HailData.swipeFreezeEnabled) ContextCompat.startForegroundService(
             context, Intent(context, SwipeFreezeService::class.java)
         )

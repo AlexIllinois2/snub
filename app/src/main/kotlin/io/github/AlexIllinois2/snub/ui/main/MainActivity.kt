@@ -1,7 +1,12 @@
 package io.github.AlexIllinois2.snub.ui.main
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.provider.Settings
 import android.view.Menu
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
@@ -11,6 +16,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.MenuCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.isVisible
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.fragment.NavHostFragment
@@ -22,20 +28,32 @@ import io.github.AlexIllinois2.snub.app.HailData
 import io.github.AlexIllinois2.snub.databinding.ActivityMainBinding
 import io.github.AlexIllinois2.snub.extensions.*
 import io.github.AlexIllinois2.snub.ui.apps.AppsFragment
-import io.github.AlexIllinois2.snub.utils.HPolicy
+import io.github.AlexIllinois2.snub.utils.HShell
+import io.github.AlexIllinois2.snub.utils.HSystem
+import io.github.AlexIllinois2.snub.utils.HTarget
 import io.github.AlexIllinois2.snub.utils.HUI
 import com.google.android.material.appbar.AppBarLayout
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedListener {
     lateinit var fab: ExtendedFloatingActionButton
     lateinit var appbar: AppBarLayout
 
+    private val requestPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { requestRootAndUsageAccess() }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         val binding = initView()
+        // Check and request every needed permission once per app process start.
+        if (!permissionsRequested) {
+            permissionsRequested = true
+            requestNeededPermissions()
+        }
         if (!HailData.biometricLogin || BiometricManager.from(this)
                 .canAuthenticate(BIOMETRIC_STRONG or DEVICE_CREDENTIAL) != BiometricManager.BIOMETRIC_SUCCESS
         ) return
@@ -98,12 +116,23 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
         AppsFragment.cameToForeground = true
     }
 
-    fun ownerRemoveDialog() {
-        MaterialAlertDialogBuilder(this).setTitle(R.string.title_remove_owner).setMessage(R.string.msg_remove_owner)
-            .setPositiveButton(R.string.action_continue) { _, _ ->
-                HPolicy.setOrganizationName()
-                HPolicy.removeDeviceOwner()
-            }.setNegativeButton(android.R.string.cancel, null).show()
+    /** Requests the notification permission first, then checks root and usage access. */
+    private fun requestNeededPermissions() {
+        if (HTarget.T && ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+            != PackageManager.PERMISSION_GRANTED
+        ) requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        else requestRootAndUsageAccess()
+    }
+
+    private fun requestRootAndUsageAccess() {
+        lifecycleScope.launch {
+            // Fires the su grant dialog once; runs off the main thread as su may block.
+            val rootGranted = withContext(Dispatchers.IO) { HShell.checkSU }
+            if (!rootGranted) HUI.showToast(R.string.permission_denied)
+            if (!HSystem.checkOpUsageStats(this@MainActivity)) startActivity(
+                Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            )
+        }
     }
 
     /* override fun onStop() {
@@ -116,5 +145,9 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
     ) {
         fab.tag = destination.id == R.id.nav_home
         if (fab.tag == true) fab.show() else fab.hide()
+    }
+
+    companion object {
+        private var permissionsRequested = false
     }
 }

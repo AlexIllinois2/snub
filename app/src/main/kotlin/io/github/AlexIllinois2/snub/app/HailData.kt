@@ -7,6 +7,7 @@ import io.github.AlexIllinois2.snub.HailApp.Companion.app
 import io.github.AlexIllinois2.snub.R
 import io.github.AlexIllinois2.snub.utils.HFiles
 import io.github.AlexIllinois2.snub.utils.HShortcuts
+import io.github.AlexIllinois2.snub.utils.TempUnfrozenList
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -36,6 +37,12 @@ object HailData {
     const val VERSION = "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})"
     const val KEY_ID = "id"
     const val KEY_TAG = "tag"
+
+    /** Id of the virtual home tab that lists every frozen app, managed or not. */
+    const val FROZEN_TAB_ID = -1
+
+    /** The virtual frozen tab followed by the user-defined tags. */
+    val displayTags: List<Tag> get() = listOf(Tag(app.getString(R.string.tab_frozen), FROZEN_TAB_ID)) + tags
     private const val KEY_TAGS = "tags"
     private const val KEY_AUTO_FREEZE_BACKGROUND = "auto_freeze_background"
     private const val KEY_AUTO_FREEZE_BACKGROUND_DELAY = "auto_freeze_background_delay"
@@ -53,52 +60,21 @@ object HailData {
     const val FILTER_SYSTEM_APPS = "filter_system_apps"
     const val FILTER_FROZEN_APPS = "filter_frozen_apps"
     const val FILTER_UNFROZEN_APPS = "filter_unfrozen_apps"
-    const val OWNER = "owner_"
-    const val DHIZUKU = "dhizuku_"
     const val SU = "su_"
-    const val SHIZUKU = "shizuku_"
-    const val ISLAND = "island_"
-    const val PRIVAPP = "privapp_"
     const val STOP = "stop"
     const val DISABLE = "disable"
     const val HIDE = "hide"
     const val SUSPEND = "suspend"
     const val WORKING_MODE = "working_mode"
-    const val MODE_DEFAULT = "default"
-    const val MODE_SHIZUKU_STOP = SHIZUKU + STOP
-    const val MODE_SHIZUKU_DISABLE = SHIZUKU + DISABLE
-    const val MODE_SHIZUKU_HIDE = SHIZUKU + HIDE
-    const val MODE_SHIZUKU_SUSPEND = SHIZUKU + SUSPEND
     const val MODE_SU_STOP = SU + STOP
     const val MODE_SU_DISABLE = SU + DISABLE
     const val MODE_SU_HIDE = SU + HIDE
     const val MODE_SU_SUSPEND = SU + SUSPEND
-    const val MODE_DHIZUKU_HIDE = DHIZUKU + HIDE
-    const val MODE_DHIZUKU_SUSPEND = DHIZUKU + SUSPEND
-    const val MODE_OWNER_HIDE = OWNER + HIDE
-    const val MODE_OWNER_SUSPEND = OWNER + SUSPEND
-    const val MODE_ISLAND_HIDE = ISLAND + HIDE
-    const val MODE_ISLAND_SUSPEND = ISLAND + SUSPEND
-    const val MODE_PRIVAPP_STOP = PRIVAPP + STOP
-    const val MODE_PRIVAPP_DISABLE = PRIVAPP + DISABLE
     val WORKING_MODE_VALUES = listOf(
-        MODE_DEFAULT,
-        MODE_SHIZUKU_STOP,
-        MODE_SHIZUKU_DISABLE,
-        MODE_SHIZUKU_HIDE,
-        MODE_SHIZUKU_SUSPEND,
         MODE_SU_STOP,
         MODE_SU_DISABLE,
         MODE_SU_HIDE,
-        MODE_SU_SUSPEND,
-        MODE_DHIZUKU_HIDE,
-        MODE_DHIZUKU_SUSPEND,
-        MODE_OWNER_HIDE,
-        MODE_OWNER_SUSPEND,
-        MODE_ISLAND_HIDE,
-        MODE_ISLAND_SUSPEND,
-        MODE_PRIVAPP_STOP,
-        MODE_PRIVAPP_DISABLE
+        MODE_SU_SUSPEND
     )
     const val BIOMETRIC_LOGIN = "biometric_login"
     const val APP_THEME = "app_theme"
@@ -154,7 +130,16 @@ object HailData {
     val filterSystemApps get() = sp.getBoolean(FILTER_SYSTEM_APPS, false)
     val filterFrozenApps get() = sp.getBoolean(FILTER_FROZEN_APPS, true)
     val filterUnfrozenApps get() = sp.getBoolean(FILTER_UNFROZEN_APPS, true)
-    val workingMode get() = sp.getString(WORKING_MODE, MODE_DEFAULT)!!
+    val workingMode: String
+        get() {
+            val mode = sp.getString(WORKING_MODE, MODE_SU_DISABLE)!!
+            if (mode !in WORKING_MODE_VALUES) {
+                // Reset working modes removed in the root-only build
+                sp.edit { putString(WORKING_MODE, MODE_SU_DISABLE) }
+                return MODE_SU_DISABLE
+            }
+            return mode
+        }
     val biometricLogin get() = sp.getBoolean(BIOMETRIC_LOGIN, false)
     val appTheme get() = sp.getString(APP_THEME, FOLLOW_SYSTEM)!!
     val iconPack get() = sp.getString(ICON_PACK, ACTION_NONE)!!
@@ -215,6 +200,8 @@ object HailData {
     fun removeCheckedApp(packageName: String, saveApps: Boolean = true) {
         checkedList.removeAll { it.packageName == packageName }
         if (saveApps) saveApps()
+        // Unmanaged apps are no longer candidates for swipe-away freezing.
+        TempUnfrozenList.remove(packageName)
     }
 
     fun saveApps() {

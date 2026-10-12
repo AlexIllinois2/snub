@@ -1,33 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Snub</string>
-    <string name="msg_remove_owner">إذا تمت إزالة Hail كمالك للجهاز، فقد تكون هناك صعوبات في إعادة تنظيم التطبيقات بعد إزالة hail.
-\nستظل التطبيقات المجمدة مجمدة بعد إلغاء التثبيت، يرجى التأكد من إلغاء تجميد التطبيقات المهمة.</string>
     <string name="msg_freeze">مجمد: %s</string>
     <string name="action_whitelist">إضافة إلى القائمة البيضاء</string>
     <string name="synthesize_adaptive_icons">تجميع الأيقونات التكيفية</string>
     <string name="title_customize">تخصيص</string>
     <string name="action_unpin">إزالة التثبيت</string>
-    <string name="title_remove_owner">إزالة مالك الجهاز</string>
     <string name="action_deselect">الغاء تحديد</string>
     <string name="msg_unfreeze">غير مجمد: %s</string>
     <string name="action_remove_home">إزالة من الصفحة الرئيسية</string>
     <string name="action_deferred_task">مهمة مؤجلة</string>
     <string name="action_unfreeze_tag">إلغاء تجميد العلامة</string>
     <string name="msg_uninstall">هل تريد إلغاء تثبيت هذا التطبيق؟</string>
-    <string name="mode_owner_suspend">مالك الجهاز - تعليق</string>
-    <string name="mode_dhizuku_suspend">Dhizuku - تعليق</string>
     <string name="action_clear_dynamic_shortcuts">مسح كل الاختصارات الديناميكية</string>
-    <string name="mode_default">خامل</string>
     <string name="action_import_app">استيراد التطبيق</string>
     <string name="action_import_clipboard">استيراد من الحافظة</string>
-    <string name="shizuku_missing">Shizuku مفقود :(</string>
     <string name="msg_exported">تم تصدير: %s</string>
     <string name="msg_text_copied">منسوخ: %s</string>
     <string name="donate_liberapay">Liberapay</string>
     <string name="skip_foreground_app">تخطي التطبيق الأمامي</string>
     <string name="icon_pack">حزمة الأيقونات</string>
-    <string name="mode_owner_hide">مالك الجهاز - إخفاء</string>
     <string name="working_mode">وضع العمل</string>
     <string name="sort_name">التسمية</string>
     <string name="auto_freeze_notification_title">خدمة التجميد التلقائي قيد التشغيل</string>
@@ -38,8 +30,6 @@
     <string name="tap_to_select">انقر للتحديد المتعدد</string>
     <string name="filter_user_apps">المستخدم</string>
     <string name="nothing_here">لا شيء هنا</string>
-    <string name="msg_set_owner">إصدار الأمر من adb:
-\n%s</string>
     <string name="action_none">لا شيء</string>
     <string name="action_lock_freeze">قفل وتجميد</string>
     <string name="action_import_frozen">استيراد التطبيق المجمد</string>
@@ -73,7 +63,6 @@
     <string name="title_donate">شكرا لك!</string>
     <string name="compact_icon">أيقونة مضغوطة</string>
     <string name="action_uninstall">إلغاء التثبيت</string>
-    <string name="mode_dhizuku_hide">Dhizuku - إخفاء</string>
     <string name="action_extract_apk">استخراج APK</string>
     <string name="action_freeze_tag">علامة التجميد</string>
     <string name="action_select_all">تحديد الكل</string>
@@ -84,7 +73,6 @@
     <string name="filter_by">فلتر</string>
     <string name="operation_failed">فشلت العملية: %s</string>
     <string name="action_add_pin_shortcut">إضافة إلى الشاشة الرئيسية</string>
-    <string name="mode_shizuku_hide">Shizuku - إخفاء</string>
     <string name="action_launch">إطلاق</string>
     <string name="action_tag_add">إضافة علامة</string>
     <string name="donate_alipay">Alipay</string>
@@ -92,7 +80,6 @@
     <string name="filter_system_apps">النظام</string>
     <string name="sort_install">أول تثبيت</string>
     <string name="action_tag_remove">إزالة علامة</string>
-    <string name="mode_shizuku_suspend">Shizuku - تعليق</string>
     <string name="mode_su_suspend">روت - تعليق</string>
     <plurals name="deferred_task_entry">
         <item quantity="zero">أقل من دقيقة</item>
@@ -104,7 +91,6 @@
     </plurals>
     <string name="action_fdroid">F-Droid</string>
     <string name="action_lock">قفل</string>
-    <string name="msg_guide">قبل تجميد التطبيقات، يرجى تحديد وضع العمل في الإعدادات.</string>
     <string name="sort_update">آخر تحديث</string>
     <string name="action_unfreeze">إلغاء التجميد</string>
     <string name="donate_wechat">WeChat Pay</string>
@@ -118,7 +104,6 @@
     <string name="title_home">الرئيسية</string>
     <string name="action_licenses">التراخيص</string>
     <string name="action_translate">ترجمة</string>
-    <string name="mode_shizuku_disable">Shizuku - تعطيل</string>
     <string name="action_donate">تبرّع</string>
     <string name="label_time">وقت التثبيت</string>
     <string name="action_github">GitHub</string>
@@ -126,7 +111,6 @@
     <string name="title_settings">الإعدادات</string>
     <string name="label_version">الإصدار</string>
     <string name="title_apps">التطبيقات</string>
-    <string name="title_set_owner">تعيين مالك الجهاز</string>
     <string name="action_freeze_current">تجميد مرئي</string>
     <string name="msg_extract_apk">مستخرج إلى: %s</string>
     <string name="action_freeze_non_whitelisted">تجميد باستشناء القائمة البيضاء</string>
@@ -138,19 +122,13 @@
     <string name="donate_wechat_scan">مسح ضوئي</string>
     <string name="action_remove_whitelist">إزالة من القائمة البيضاء</string>
     <string name="action_skip">تخطي</string>
-    <string name="mode_island_hide">Island/Insular - إخفاء</string>
-    <string name="mode_island_suspend">Island - تعليق</string>
     <string name="command">الأمر</string>
     <string name="tag">علامة</string>
     <string name="action_continue">متابعة</string>
-    <string name="shizuku_hide_adb">Shizuku يعمل بالـadb. لإخفاء التطبيقات، يرجى تشغيله مرة أخرى مع الروت.</string>
     <string name="nine_key">البحث T9</string>
     <string name="home_font_size">حجم خط الرئيسية</string>
     <string name="freeze_system_app">قد يتسبب تجميد أو إلغاء تثبيت تطبيقات النظام في تعليق الجهاز على شاشة الإقلاع. تأكد من أنك تعرف ما تفعله وقم بعمل نسخة احتياطية من بياناتك مسبقاً أو استخدم الاسترداد الذي يدعم إدارة الملفات.</string>
-    <string name="mode_privapp_stop">تطبيقات النظام - إيقاف إجباري</string>
-    <string name="mode_shizuku_stop">Shizuku - إيقاف إجباري</string>
     <string name="mode_su_stop">روت - إيقاف إجباري</string>
-    <string name="mode_privapp_disable">تطبيقات النظام - تعطيل</string>
     <string name="fuzzy_search">بحث غامض</string>
     <string name="action_reinstall">إعادة تثبيت</string>
     <string name="app_theme">مظهر التطبيق</string>

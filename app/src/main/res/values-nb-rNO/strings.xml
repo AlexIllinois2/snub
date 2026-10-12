@@ -71,20 +71,13 @@
     <string name="msg_extract_apk">Utpakket til: %s</string>
     <string name="nothing_here">Ingenting her</string>
     <string name="dynamic_shortcut_action">Dynamisk snarveishandling</string>
-    <string name="mode_owner_suspend">Enhetseier — hvilemodus</string>
     <string name="mode_su_suspend">Superbruker — hvilemodus</string>
-    <string name="mode_shizuku_disable">Shizuku — skru av</string>
     <string name="filter_by">Filter</string>
     <string name="app_slogan">Fryseklar-het.</string>
     <string name="msg_uninstall">Avinstaller dette programmet\?</string>
-    <string name="mode_owner_hide">Enhetseier — skjul</string>
     <string name="action_deselect">Fravelg</string>
     <string name="action_unfreeze_remove_home">Tin og fjern fra hjem</string>
     <string name="working_mode">Arbeidsmodus</string>
-    <string name="mode_default">Lediggang</string>
-    <string name="title_set_owner">Sett enhetseier</string>
-    <string name="msg_set_owner">Utfør følgende kommando fra ADB:
-\n%s</string>
     <string name="permission_denied">Tilgang nektet</string>
     <string name="operation_failed">Operasjonen mislyktes: %s</string>
     <plurals name="msg_deferred_task">
@@ -94,16 +87,12 @@
     <string name="action_biometric">Biometrisk innlogging</string>
     <string name="action_freeze_tag">Frysningsetikett</string>
     <string name="mode_su_disable">Superbruker — skru av</string>
-    <string name="mode_shizuku_hide">Shizuku — skjul</string>
     <string name="tile_action">Flishandling</string>
     <string name="auto_freeze_notification_title">Autofrysningstjenesten kjører</string>
-    <string name="mode_shizuku_suspend">Shizuku — hvilemodus</string>
-    <string name="title_remove_owner">Fjern enhetseier</string>
     <string name="tap_to_select">Trykk for å å velge flere</string>
     <string name="donate_alipay">Apipay</string>
     <string name="donate_wechat">WeChat Pay</string>
     <string name="activity_not_found">Finner ikke oppstartsaktivitet</string>
-    <string name="shizuku_missing">Shizuku mangler :(</string>
     <string name="msg_freeze">Fryst: %s</string>
     <string name="auto_freeze_after_lock">Etter skjermlås</string>
     <string name="skip_while_charging">Hopp over ved lading</string>
@@ -120,11 +109,6 @@
     <string name="action_remove_whitelist">Fjern fra hvitliste</string>
     <string name="action_import_frozen">Importer fryst program</string>
     <string name="skip_notifying_app">Hopp over merknadsprogram</string>
-    <string name="msg_guide">Sett et arbeidsmodus i innstillingene før frysing av programmer.</string>
-    <string name="msg_remove_owner">Enhetseier vil fremdeles bli fjernet, det kan være vanskelig å sette det igjen etter fjerning.
-\nSkjulte programmer er skjult etter fjerning. Forsikre deg om at du har opphevet skjuling av viktige programmer.</string>
     <string name="action_select_all">Velg alt</string>
-    <string name="mode_dhizuku_hide">Dhizuku — skjul</string>
-    <string name="mode_dhizuku_suspend">Dhizuku — hvilemodus</string>
     <string name="action_terminal">Terminal</string>
 </resources>

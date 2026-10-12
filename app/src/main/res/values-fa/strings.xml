@@ -40,14 +40,7 @@
     <string name="action_details">داده‌های برنامه</string>
     <string name="msg_uninstall">می‌خواهید این برنامه را حذف کنید؟</string>
     <string name="working_mode">حالت کاری</string>
-    <string name="mode_default">بیکار</string>
-    <string name="mode_owner_hide">مالک دستگاه - نهفتن</string>
     <string name="mode_su_suspend">روت - تعلیق</string>
-    <string name="mode_shizuku_disable">شیزوکو - از کار انداختن</string>
-    <string name="mode_shizuku_hide">شیوزوکو - نهفتن</string>
-    <string name="mode_shizuku_suspend">شیزوکو - تعلیق</string>
-    <string name="title_set_owner">تنظیم مالک دستگاه</string>
-    <string name="title_remove_owner">حذف مالک دستگاه</string>
     <string name="tap_to_select">برای چندگزینشی بزنید</string>
     <string name="filter_by">فیلتر</string>
     <string name="filter_user_apps">کاربر</string>
@@ -64,7 +57,6 @@
     <string name="donate_liberapay">لیبراپی</string>
     <string name="donate_paypal">پی‌پل</string>
     <string name="app_not_installed">برنامه نصب نشد</string>
-    <string name="shizuku_missing">شیزوکو نصب نیست :(</string>
     <string name="operation_failed">عملیات شکست خورد: %s</string>
     <string name="msg_selected">گزیده: %s</string>
     <string name="msg_text_copied">رونوشت شده: %s</string>
@@ -87,10 +79,7 @@
     <string name="action_extract_apk">استخراج APK</string>
     <string name="mode_su_disable">روت - غیرفعال کردن</string>
     <string name="action_uninstall">حذف نصب</string>
-    <string name="mode_owner_suspend">مالک دستگاه - تعلیق</string>
     <string name="msg_imported">درون ریخته: %s</string>
-    <string name="msg_set_owner">دستور زیر را از adb اجرا کنید:
-\n%s</string>
     <string name="donate_alipay">علی‌پی</string>
     <string name="synthesize_adaptive_icons">آمیختن آیکون‌های سازگار</string>
     <string name="skip_notifying_app">رد کردن برنامه‌ی دارای نوتیفیکیشن</string>
@@ -106,14 +95,10 @@
         <item quantity="one">%d دقیقه</item>
         <item quantity="other">%d (دقیقه)</item>
     </plurals>
-    <string name="mode_island_suspend">Island/Insular - تعلیق</string>
     <string name="command">فرمان</string>
     <string name="tag">برچسب</string>
     <string name="action_continue">ادامه</string>
-    <string name="mode_island_hide">Island/Insular - پنهان کردن</string>
     <string name="action_deferred_task">کار عقب افتاده</string>
-    <string name="mode_dhizuku_hide">دیزوکو - پنهان کردن</string>
-    <string name="mode_privapp_disable">برنامه سیستم - غیرفعال کنید</string>
     <string name="action_clear_dynamic_shortcuts">تمام میانبرهای پویا را پاک کنید</string>
     <string name="dynamic_shortcut_action">اقدام میانبر پویا</string>
     <string name="action_freeze_tag">برچسب فریز</string>
@@ -122,21 +107,15 @@
     <string name="mode_su_hide">روت - پنهان کردن</string>
     <string name="action_fdroid">F-Droid</string>
     <string name="action_skip">رد کردن</string>
-    <string name="msg_remove_owner">اگر Hail به عنوان مالک دستگاه حذف شود، ممکن است پس از حذف Hail در سازماندهی مجدد برنامه‌ها مشکلاتی وجود داشته باشد. \n برنامه‌های یخ‌زده پس از حذف به همان شکل می‌مانند، لطفاً مطمئن شوید که برنامه‌های مهم را از حالت یخ‌زدگی بیرون آورده‌اید.</string>
     <string name="permission_denied">اجازه رد شد</string>
     <string name="activity_not_found">فعالیت راه اندازی یافت نشد</string>
     <string name="skip_while_charging">رد کردن هنگام شارژ</string>
     <string name="msg_biometric">با استفاده از بیومتریک خود وارد شوید</string>
     <string name="action_import_frozen">درون ریزی برنامه یخ زده</string>
-    <string name="mode_dhizuku_suspend">دیزوکو - تعلیق</string>
-    <string name="msg_guide">قبل از یخ زدن برنامه‌ها، لطفاً یک حالت کار را در تنظیمات انتخاب کنید.</string>
     <string name="action_unfreeze_tag">باز کردن برچسب</string>
     <string name="freeze_system_app">مسدود کردن یا حذف برنامه های سیستمی ممکن است باعث بوت لوپ شدن دستگاه شود. مطمئن شوید که می دانید چه کاری انجام می دهید و از اطلاعات خود نسخه پشتیبان تهیه کنید یا از بازیابی استفاده کنید که از مدیریت فایل پشتیبانی می کند.</string>
     <string name="fuzzy_search">جستجوی فازی</string>
-    <string name="mode_privapp_stop">برنامه سیستم - توقف اجباری</string>
-    <string name="mode_shizuku_stop">شیزوکو - توقف اجباری</string>
     <string name="mode_su_stop">روت - توقف اجباری</string>
-    <string name="shizuku_hide_adb">شیزوکو به عنوان adb اجرا می‌شود برای مخفی کردن برنامه ها،لطفا شیزوکو را مجدد با دسترسی روت راه اندازی کنید.</string>
     <string name="action_reinstall">نصب دوباره</string>
     <string name="nine_key">جستجوی T9</string>
     <plurals name="msg_deferred_task">

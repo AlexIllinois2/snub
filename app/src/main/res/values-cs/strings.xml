@@ -30,10 +30,7 @@
     <string name="action_extract_apk">Extrahovat APK</string>
     <string name="msg_uninstall">Chceš odinstalovat tuto aplikaci\?</string>
     <string name="working_mode">Režim fungování</string>
-    <string name="mode_default">Nečinná</string>
-    <string name="mode_owner_hide">Majitel Zařízení - Skrýt</string>
     <string name="mode_su_suspend">Superuser - Suspendovat</string>
-    <string name="mode_shizuku_disable">Shizuku - Deaktivovat</string>
     <string name="app_name">Snub</string>
     <string name="title_home">Domů</string>
     <string name="action_telegram">Skupina telegram</string>
@@ -44,6 +41,5 @@
     <string name="action_help">Pomoc</string>
     <string name="action_search">Najít</string>
     <string name="action_details">Informace o aplikaci</string>
-    <string name="mode_owner_suspend">Majitel Zařízení - Suspendovat</string>
     <string name="mode_su_disable">Superuser - Deaktivovat</string>
 </resources>

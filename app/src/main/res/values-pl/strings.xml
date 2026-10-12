@@ -33,8 +33,6 @@
     <string name="action_uninstall">Odinstaluj</string>
     <string name="msg_uninstall">Czy na pewno chcesz odinstalować aplikację?</string>
     <string name="working_mode">Tryb działania</string>
-    <string name="title_set_owner">Ustaw właściciela urządzenia</string>
-    <string name="title_remove_owner">Usuń właściciela urządzenia</string>
     <string name="tap_to_select">Dotknij, aby wybrać wiele</string>
     <string name="filter_by">Filtruj według</string>
     <string name="filter_user_apps">Użytkownik</string>
@@ -48,7 +46,6 @@
     <string name="donate_paypal">PayPal</string>
     <string name="permission_denied">Odmowa dostępu</string>
     <string name="app_not_installed">Aplikacja nie zainstalowana</string>
-    <string name="shizuku_missing">Brak Shizuku :(</string>
     <string name="msg_selected">Wybrane: %s</string>
     <string name="msg_exported">Wyeksportowane: %s</string>
     <string name="msg_imported">Zaimportowane: %s</string>
@@ -70,7 +67,6 @@
     <string name="action_lock">Zablokuj</string>
     <string name="action_undo">Cofnij</string>
     <string name="action_search">Szukaj</string>
-    <string name="msg_remove_owner">Jeśli Hail zostanie usunięte jako właściciel urządzenia, mogą wystąpić problemy przy reorganizacji aplikacji. \n\nZamrożone aplikacje pozostaną w takim stanie po usunięciu, proszę, upewnij się że ważne aplikacje są odmrożone.</string>
     <string name="filter_unfrozen_apps">Odmrożone</string>
     <string name="filter_frozen_apps">Zamrożone</string>
     <string name="donate_alipay">Alipay</string>
@@ -78,19 +74,9 @@
     <string name="operation_failed">Operacja nieudana: %s</string>
     <string name="app_slogan">Mroźność!</string>
     <string name="action_extract_apk">Ekstrakcja APK</string>
-    <string name="mode_default">Bezczynne</string>
-    <string name="mode_owner_hide">Właściciel urządzenia - Ukryj</string>
-    <string name="mode_owner_suspend">Właściciel urządzenia - Zawieś</string>
     <string name="mode_su_stop">Root - Wymuś zatrzymanie</string>
     <string name="mode_su_disable">Root - Wyłącz</string>
     <string name="mode_su_suspend">Root - Zawieś</string>
-    <string name="mode_shizuku_stop">Shizuku - Wymuś zatrzymanie</string>
-    <string name="mode_shizuku_disable">Shizuku - Wyłącz</string>
-    <string name="mode_shizuku_hide">Shizuku - Ukryj</string>
-    <string name="mode_shizuku_suspend">Shizuku - Zawieś</string>
-    <string name="mode_privapp_stop">System - Wymuś zatrzymanie</string>
-    <string name="mode_privapp_disable">System - Wyłącz</string>
-    <string name="msg_set_owner">Wyślij polecenie z ADB:\n%s</string>
     <string name="action_pin">Przypnij</string>
     <string name="action_unpin">Odepnij</string>
     <string name="action_whitelist">Dodaj do białej listy</string>
@@ -103,7 +89,6 @@
     <string name="action_export_all">Eksportuj wszystkie</string>
     <string name="skip_notifying_app">Pomiń aplikację powiadamiającą</string>
     <string name="title_shortcuts">Skróty</string>
-    <string name="msg_guide">Proszę, wybierz tryb działania w ustawieniach, przed zamrożeniem aplikacji.</string>
     <string name="dynamic_shortcut_action">Akcja dynamicznego skrótu</string>
     <string name="action_none">Żadna</string>
     <string name="action_freeze_tag">Etykieta zamrożone</string>
@@ -111,14 +96,9 @@
     <string name="icon_pack">Paczka ikon</string>
     <string name="action_select_all">Wybierz wszystkie</string>
     <string name="action_terminal">Terminal</string>
-    <string name="mode_dhizuku_hide">Dhizuku - Ukryj</string>
-    <string name="mode_dhizuku_suspend">Dhizuku - Zawieś</string>
     <string name="mode_su_hide">Root - Ukryj</string>
     <string name="action_fdroid">F-Droid</string>
     <string name="action_skip">Pomiń</string>
-    <string name="mode_island_hide">Island/Insular - Ukryj</string>
-    <string name="mode_island_suspend">Island/Insular - Zawieś</string>
-    <string name="shizuku_hide_adb">Shizuku jest uruchomione jako ADB. Aby ukryć aplikacje, uruchom ponownie Shizuku w trybie Root.</string>
     <string name="command">Polecenie</string>
     <string name="tag">Etykieta</string>
     <string name="freeze_system_app">Zamrożenie lub usunięcie systemowych aplikacji może powodować zawieszenie systemu po ponownym uruchomieniu. Upewnij się, że wiesz co robisz i utwórz wcześniej kopie zapasowe, lub użyj trybu odzyskiwania który pozwala zarządzać plikami.</string>

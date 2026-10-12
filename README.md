@@ -11,12 +11,29 @@ freeze Android apps. [GitHub Releases](https://github.com/AlexIllinois2/snub/rel
 
 - **Renamed**: app name *Hail* → *Snub*, package name `com.aistra.hail` → `io.github.AlexIllinois2.snub`.
   API actions become `io.github.AlexIllinois2.snub.action.*`, while the URI scheme remains `hail://`.
+- **Root only**: all non-root working modes (Shizuku, Dhizuku, Device Owner, Island, priv-app and the
+  idle mode) were removed; only the four Root working modes remain, with *Root - Disable* as the default.
+  On startup the app checks and requests all needed permissions once per process: root (su grant dialog),
+  notification permission and Usage access.
 - **Auto freeze on swipe**: a foreground service (Root working mode only) polls the recents screen and
   automatically freezes managed apps that are absent from recents, including apps swiped away or never seen.
   Polling interval, freeze delay after unfreeze and other options are configurable in Settings, and the
-  service is restored on boot.
+  service is restored on boot. Only live task entries from `dumpsys activity recents` are matched, so on
+  Android 14+ ROMs that keep swiped-away tasks in `mHiddenTasks` swiped apps are still frozen in time;
+  the unfrozen app list is re-seeded periodically so apps launched directly from the launcher stay tracked,
+  entries of apps that are no longer checked are purged, and a root watchdog revives the service when the
+  ROM kills it.
 - **Batch home screen shortcuts**: create launcher shortcuts for all eligible frozen apps on a tag page
   in one go, instead of adding them one by one.
+- **Frozen tab on home**: the home page now starts with a "Frozen" tab listing every app frozen under
+  the current working mode, managed by Snub or not and no matter which tool froze it; tapping or
+  long-pressing unfreezes it. Unmanaged apps only offer unfreeze and app info.
+- **Check to manage**: checking an app in the apps list only adds it to management (no freezing);
+  unchecking removes it from management first and then unfreezes it immediately, so the swipe-freeze
+  service cannot interfere. Select all / unselect all follow the same behavior.
+- **Batch progress**: batch freeze/unfreeze operations show a live progress dialog (current app,
+  progress bar and counter) instead of appearing frozen; background paths (API, lock freeze) keep
+  their silent behavior.
 - **Auto-refresh apps list**: the apps page automatically refreshes on the first entry after the app
   returns to the foreground, so newly installed apps show up without a manual refresh.
 - **Low battery auto shutdown**: a foreground service (Root working mode only) monitors the battery level and
@@ -25,6 +42,9 @@ freeze Android apps. [GitHub Releases](https://github.com/AlexIllinois2/snub/rel
   length are configurable in Settings, and the service is restored on boot.
 - **Per-tag auto-freeze policies**: each tag can individually enable *freeze after going to background*
   and *freeze after screen locked*, each with its own timeout in seconds (0 = freeze immediately).
+  Background freeze detects the foreground app in real time via dumpsys in Root working modes (some ROMs
+  deliver UsageEvents with long delays or not at all, which breaks foreground tracking), and the persistent
+  notification shows a warning when the Usage access permission is not granted.
   The global auto-freeze switch, delay and the quick settings tile "Auto freeze" toggle action were removed.
 - **Single tag per app**: an app can only belong to one tag (previously multiple tags).
 - **Silent home screen shortcuts**: optionally create home screen shortcuts silently (no confirmation
@@ -35,6 +55,8 @@ freeze Android apps. [GitHub Releases](https://github.com/AlexIllinois2/snub/rel
   root) working mode, Snub instead delivers the broadcast as root via an `app_process` helper,
   bypassing both restrictions on launchers that still support the legacy broadcast.
 - **CI releases**: GitHub Actions automatically builds and attaches an APK to a GitHub Release on tag push.
+- **Batch management**: new *Select all* and *Unselect all* items in the apps list menu to batch
+  add or remove apps from management.
 
 <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.png" width="32%" /> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.png" width="32%" /> <img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.png" width="32%" />
 

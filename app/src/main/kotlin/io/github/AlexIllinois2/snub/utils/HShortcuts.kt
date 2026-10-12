@@ -104,28 +104,18 @@ object HShortcuts {
     private val silentScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val silentMutex = Mutex()
 
-    /** Whether the current working mode grants root, allowing [RootShortcutSender] to be used. */
-    private val hasRootAccess: Boolean
-        get() = HailData.workingMode.startsWith(HailData.SU) ||
-                (HailData.workingMode.startsWith(HailData.SHIZUKU) &&
-                        runCatching { HShizuku.isRoot }.getOrDefault(false))
-
     /**
      * Sends the INSTALL_SHORTCUT broadcasts for [packages] as root via [RootShortcutSender],
      * bypassing the system-side drop for O+ targeting senders and launcher per-app permissions.
-     * @return the packages whose broadcasts were delivered; an empty list when root was available
-     * but the helper failed (reported as 0, never falling back to a broadcast that the system
-     * drops anyway); or null when root is unavailable, meaning the caller should send as the app.
+     * @return the packages whose broadcasts were delivered; an empty list when the helper failed
+     * (reported as 0, never falling back to a broadcast that the system drops anyway).
      */
     private fun sendRootShortcuts(packages: List<String>): List<String>? {
-        if (packages.isEmpty() || !hasRootAccess) return null
+        if (packages.isEmpty()) return null
         val apkPath = app.applicationInfo.sourceDir ?: return null
         val command = "env CLASSPATH=$apkPath app_process /system --nice-name=snub_shortcut " +
                 RootShortcutSender::class.java.name + " " + packages.joinToString(" ")
-        val (_, output) = when {
-            HailData.workingMode.startsWith(HailData.SU) -> HShell.execute(command, true)
-            else -> HShizuku.execute(command, true)
-        }
+        val (_, output) = HShell.execute(command, true)
         val delivered = output?.lineSequence()?.mapNotNull { line ->
             if (line.startsWith("OK ")) line.removePrefix("OK ").trim().takeIf { it.isNotEmpty() } else null
         }?.toList().orEmpty()

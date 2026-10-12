@@ -14,7 +14,6 @@ import io.github.AlexIllinois2.snub.app.HailData
 import io.github.AlexIllinois2.snub.services.AutoFreezeService
 import io.github.AlexIllinois2.snub.services.LowBatteryShutdownService
 import io.github.AlexIllinois2.snub.services.SwipeFreezeService
-import io.github.AlexIllinois2.snub.utils.HDhizuku
 import io.github.AlexIllinois2.snub.utils.HTarget
 
 class HailApp : Application() {
@@ -23,13 +22,12 @@ class HailApp : Application() {
         app = this
         // DirtyDataUpdater.update(app)
         if (!HTarget.S) setAppTheme(HailData.appTheme)
-        if (HailData.workingMode.startsWith(HailData.DHIZUKU)) HDhizuku.init()
         // Package update force-stops the app and cancels START_STICKY restarts,
         // so the service must be restored here as well as on boot.
-        if (HailData.swipeFreezeEnabled && HailData.workingMode.startsWith(HailData.SU)) {
+        if (HailData.swipeFreezeEnabled) {
             setSwipeFreezeService(true)
         }
-        if (HailData.lowBatteryShutdown && HailData.workingMode.startsWith(HailData.SU)) {
+        if (HailData.lowBatteryShutdown) {
             setLowBatteryShutdownService(true)
         }
     }

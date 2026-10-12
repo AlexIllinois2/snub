@@ -5,7 +5,6 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.Settings
 import android.view.*
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.ArrayRes
 import androidx.annotation.StringRes
 import androidx.appcompat.content.res.AppCompatResources
@@ -39,27 +38,17 @@ import io.github.AlexIllinois2.snub.app.AppManager
 import io.github.AlexIllinois2.snub.app.HailApi
 import io.github.AlexIllinois2.snub.app.HailData
 import io.github.AlexIllinois2.snub.databinding.DialogInputBinding
-import io.github.AlexIllinois2.snub.ui.main.MainActivity
 import io.github.AlexIllinois2.snub.ui.main.MainFragment
 import io.github.AlexIllinois2.snub.ui.theme.AppTheme
 import io.github.AlexIllinois2.snub.utils.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textview.MaterialTextView
-import com.rosan.dhizuku.api.Dhizuku
-import com.rosan.dhizuku.api.DhizukuRequestPermissionListener
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.channels.trySendBlocking
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.zhanghai.compose.preference.*
-import rikka.shizuku.Shizuku
 
 class SettingsFragment : MainFragment(), MenuProvider {
-    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) {}
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val menuHost = requireActivity() as MenuHost
         menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
@@ -82,7 +71,7 @@ class SettingsFragment : MainFragment(), MenuProvider {
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             listPreference(
                 key = HailData.WORKING_MODE,
-                defaultValue = HailData.MODE_DEFAULT,
+                defaultValue = HailData.MODE_SU_DISABLE,
                 onValueChange = ::onWorkingModeChange,
                 values = HailData.WORKING_MODE_VALUES,
                 entriesId = R.array.working_mode_entries,
@@ -223,13 +212,8 @@ class SettingsFragment : MainFragment(), MenuProvider {
             switchPreference(
                 rememberState = { swipeFreezeEnabled },
                 onValueChange = { _, value ->
-                    if (value && !HailData.workingMode.startsWith(HailData.SU)) {
-                        HUI.showToast(R.string.swipe_freeze_needs_root)
-                        false
-                    } else {
-                        app.setSwipeFreezeService(value)
-                        true
-                    }
+                    app.setSwipeFreezeService(value)
+                    true
                 },
                 titleId = R.string.swipe_freeze,
                 icon = Icons.Outlined.AcUnit
@@ -262,13 +246,8 @@ class SettingsFragment : MainFragment(), MenuProvider {
             switchPreference(
                 rememberState = { lowBatteryShutdown },
                 onValueChange = { _, value ->
-                    if (value && !HailData.workingMode.startsWith(HailData.SU)) {
-                        HUI.showToast(R.string.swipe_freeze_needs_root)
-                        false
-                    } else {
-                        app.setLowBatteryShutdownService(value)
-                        true
-                    }
+                    app.setLowBatteryShutdownService(value)
+                    true
                 },
                 titleId = R.string.low_battery_shutdown,
                 icon = Icons.Outlined.PowerSettingsNew
@@ -494,113 +473,10 @@ class SettingsFragment : MainFragment(), MenuProvider {
     fun onWorkingModeChange(rememberState: MutableState<String>, mode: String): Boolean {
         // Show/hide terminal menu.
         activity.invalidateOptionsMenu()
-        when {
-            mode.startsWith(HailData.OWNER) -> if (!HPolicy.isDeviceOwnerActive) {
-                MaterialAlertDialogBuilder(requireActivity()).setTitle(R.string.title_set_owner)
-                    .setMessage(getString(R.string.msg_set_owner, HPolicy.ADB_COMMAND))
-                    .setPositiveButton(android.R.string.ok, null)
-                    .setNeutralButton(android.R.string.copy) { _, _ -> HUI.copyText(HPolicy.ADB_COMMAND) }.show()
-                    .findViewById<MaterialTextView>(android.R.id.message)?.setTextIsSelectable(true)
-                return false
-            }
-
-            mode.startsWith(HailData.DHIZUKU) -> return runCatching {
-                Dhizuku.init(app)
-                when {
-                    Dhizuku.isPermissionGranted() -> true
-                    else -> {
-                        lifecycleScope.launch {
-                            val result = callbackFlow {
-                                Dhizuku.requestPermission(object : DhizukuRequestPermissionListener() {
-                                    override fun onRequestPermission(grantResult: Int) {
-                                        trySendBlocking(grantResult == PackageManager.PERMISSION_GRANTED)
-                                    }
-                                })
-                                awaitClose()
-                            }.first()
-                            if (result) {
-                                rememberState.value = mode
-                                if (HTarget.O) HDhizuku.setDelegatedScopes()
-                            }
-                        }
-                        false
-                    }
-                }
-            }.getOrElse {
-                HLog.e(it)
-                HUI.showToast(R.string.permission_denied)
-                false
-            }
-
-            mode.startsWith(HailData.SU) -> if (!HShell.checkSU) {
-                HUI.showToast(R.string.permission_denied)
-                return false
-            }
-
-            mode.startsWith(HailData.SHIZUKU) -> return runCatching {
-                when {
-                    Shizuku.isPreV11() -> throw IllegalStateException("unsupported shizuku version")
-                    Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED -> true
-                    Shizuku.shouldShowRequestPermissionRationale() -> {
-                        HUI.showToast(R.string.permission_denied)
-                        false
-                    }
-
-                    else -> {
-                        lifecycleScope.launch {
-                            val result = callbackFlow {
-                                val shizukuRequestCode = 0
-                                val listener = Shizuku.OnRequestPermissionResultListener { requestCode, grantResult ->
-                                    if (requestCode != shizukuRequestCode) return@OnRequestPermissionResultListener
-                                    trySendBlocking(grantResult == PackageManager.PERMISSION_GRANTED)
-                                }
-                                Shizuku.addRequestPermissionResultListener(listener)
-                                Shizuku.requestPermission(shizukuRequestCode)
-                                awaitClose {
-                                    Shizuku.removeRequestPermissionResultListener(listener)
-                                }
-                            }.first()
-                            if (result) rememberState.value = mode
-                        }
-                        false
-                    }
-                }
-            }.getOrElse {
-                HLog.e(it)
-                HUI.showToast(R.string.shizuku_missing)
-                false
-            }
-
-            mode.startsWith(HailData.ISLAND) -> return runCatching {
-                when {
-                    mode == HailData.MODE_ISLAND_HIDE && HIsland.freezePermissionGranted() -> true
-                    mode == HailData.MODE_ISLAND_SUSPEND && HIsland.suspendPermissionGranted() -> true
-                    else -> {
-                        lifecycleScope.launch {
-                            requestPermissionLauncher.launch(
-                                if (mode == HailData.MODE_ISLAND_HIDE) HIsland.PERMISSION_FREEZE_PACKAGE
-                                else HIsland.PERMISSION_SUSPEND_PACKAGE
-                            )
-                        }
-                        false
-                    }
-                }
-            }.getOrElse {
-                HLog.e(it)
-                HUI.showToast(R.string.permission_denied)
-                false
-            }.also {
-                if (it) {
-                    HIsland.checkOwnerApp()
-                }
-            }
-
-            mode.startsWith(HailData.PRIVAPP) -> if (!HPackages.isPrivilegedApp(app.packageName)) {
-                HUI.showToast(R.string.permission_denied)
-                return false
-            }
+        if (!HShell.checkSU) {
+            HUI.showToast(R.string.permission_denied)
+            return false
         }
-
         return true
     }
 
@@ -623,7 +499,6 @@ class SettingsFragment : MainFragment(), MenuProvider {
     override fun onMenuItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_terminal -> showTerminalDialog()
-            R.id.action_remove_owner -> (requireActivity() as MainActivity).ownerRemoveDialog()
             R.id.action_help -> HUI.openLink(HailData.URL_README)
         }
         return false
@@ -635,11 +510,7 @@ class SettingsFragment : MainFragment(), MenuProvider {
 
     override fun onPrepareMenu(menu: Menu) {
         super.onPrepareMenu(menu)
-        if (HailData.workingMode.startsWith(HailData.SU) || HailData.workingMode.startsWith(
-                HailData.SHIZUKU
-            )
-        ) menu.findItem(R.id.action_terminal).isVisible = true
-        else if (HPolicy.isDeviceOwnerActive) menu.findItem(R.id.action_remove_owner).isVisible = true
+        menu.findItem(R.id.action_terminal).isVisible = true
     }
 
     private fun showTerminalDialog() {

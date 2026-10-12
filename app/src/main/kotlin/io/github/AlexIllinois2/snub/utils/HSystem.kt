@@ -43,6 +43,14 @@ object HSystem {
         queryUsageStats(UsageStatsManager.INTERVAL_BEST, now - 1000 * 60 * 60, now)  // to ensure that we can get the last app used
     }
 
+    /**
+     * Queries activity usage events in [start, end] for foreground tracking.
+     * Unlike aggregated [queryUsageStats], events are delivered near real-time,
+     * so a backgrounded app is no longer mistaken for the foreground app.
+     */
+    fun queryUsageEvents(context: Context, start: Long, end: Long) =
+        runCatching { context.getSystemService<UsageStatsManager>()!!.queryEvents(start, end) }.getOrNull()
+
     fun getForegroundPackageName(context: Context): String? =
         queryUsageStats(context)?.maxByOrNull { it.lastTimeUsed }?.packageName
 

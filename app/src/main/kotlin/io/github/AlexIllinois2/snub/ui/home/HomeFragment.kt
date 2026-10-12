@@ -4,9 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isVisible
 import io.github.AlexIllinois2.snub.app.AppInfo
-import io.github.AlexIllinois2.snub.app.HailData.tags
+import io.github.AlexIllinois2.snub.app.HailData
 import io.github.AlexIllinois2.snub.databinding.FragmentHomeBinding
 import io.github.AlexIllinois2.snub.extensions.applyDefaultInsetter
 import io.github.AlexIllinois2.snub.extensions.isLandscape
@@ -25,10 +24,9 @@ class HomeFragment : MainFragment() {
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        if (tags.size == 1) binding.tabs.isVisible = false
         binding.pager.adapter = HomeAdapter(this)
         TabLayoutMediator(binding.tabs, binding.pager) { tab, position ->
-            tab.text = tags[position].name
+            tab.text = HailData.displayTags[position].name
         }.attach()
         binding.tabs.applyDefaultInsetter { paddingRelative(isRtl, start = !activity.isLandscape, end = true) }
         return binding.root

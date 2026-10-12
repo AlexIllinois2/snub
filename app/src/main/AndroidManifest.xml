@@ -2,8 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-sdk tools:overrideLibrary="rikka.shizuku.api, com.rosan.dhizuku.api"/>
-
     <uses-permission
             android:name="com.android.launcher.permission.INSTALL_SHORTCUT"
             android:maxSdkVersion="25"/>
@@ -27,8 +25,6 @@
             tools:ignore="ProtectedPermissions"/>
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-    <uses-permission android:name="com.oasisfeng.island.permission.FREEZE_PACKAGE"/>
-    <uses-permission android:name="com.oasisfeng.island.permission.SUSPEND_PACKAGE"/>
 
     <application
             android:name=".HailApp"
@@ -85,25 +81,6 @@
             </intent-filter>
         </activity>
 
-        <provider
-                android:name="rikka.shizuku.ShizukuProvider"
-                android:authorities="${applicationId}.shizuku"
-                android:exported="true"
-                android:multiprocess="false"
-                android:permission="android.permission.INTERACT_ACROSS_USERS_FULL"/>
-
-        <receiver
-                android:name=".receiver.DeviceAdminReceiver"
-                android:description="@string/action_lock"
-                android:exported="false"
-                android:permission="android.permission.BIND_DEVICE_ADMIN">
-            <meta-data
-                    android:name="android.app.device_admin"
-                    android:resource="@xml/device_admin"/>
-            <intent-filter>
-                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED"/>
-            </intent-filter>
-        </receiver>
         <receiver
                 android:name=".receiver.ScreenOffReceiver"
                 android:exported="false"/>

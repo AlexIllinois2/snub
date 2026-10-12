@@ -21,10 +21,11 @@ import io.github.AlexIllinois2.snub.app.HailData
 import io.github.AlexIllinois2.snub.databinding.FragmentAppsBinding
 import io.github.AlexIllinois2.snub.extensions.*
 import io.github.AlexIllinois2.snub.ui.main.MainFragment
+import io.github.AlexIllinois2.snub.utils.HBatch
 import io.github.AlexIllinois2.snub.utils.HFiles
 import io.github.AlexIllinois2.snub.utils.HPackages
-import io.github.AlexIllinois2.snub.utils.HPolicy
 import io.github.AlexIllinois2.snub.utils.HUI
+import io.github.AlexIllinois2.snub.utils.TempUnfrozenList
 import io.github.AlexIllinois2.snub.views.HRecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.Dispatchers
@@ -181,21 +182,8 @@ class AppsFragment : MainFragment(), AppsAdapter.OnItemClickListener, AppsAdapte
     }
 
     private fun uninstallApp(name: CharSequence, pkg: String) {
-        when {
-            HPackages.isAppUninstalled(pkg) -> HUI.showToast(R.string.app_not_installed)
-
-            pkg == app.packageName -> {
-                when {
-                    HPolicy.isDeviceOwnerActive -> activity.ownerRemoveDialog()
-                    HPolicy.isProfileOwner -> HPolicy.removeProfileOwner()
-                    HPolicy.isAdminActive -> HPolicy.removeActiveAdmin()
-                    else -> showUninstallDialog(name, pkg)
-                }
-            }
-
-            HailData.workingMode == HailData.MODE_DEFAULT -> AppManager.uninstallApp(pkg)
-            else -> showUninstallDialog(name, pkg)
-        }
+        if (HPackages.isAppUninstalled(pkg)) HUI.showToast(R.string.app_not_installed)
+        else showUninstallDialog(name, pkg)
     }
 
     private fun showUninstallDialog(name: CharSequence, pkg: String) {
@@ -208,9 +196,22 @@ class AppsFragment : MainFragment(), AppsAdapter.OnItemClickListener, AppsAdapte
     override fun onItemCheckedChange(
         buttonView: CompoundButton, isChecked: Boolean, packageName: String
     ) {
-        if (isChecked) HailData.addCheckedApp(packageName)
-        else HailData.removeCheckedApp(packageName)
-        buttonView.isChecked = HailData.isChecked(packageName)
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+            if (isChecked) {
+                // Checking only adds the app to management; freezing must be done explicitly.
+                HailData.addCheckedApp(packageName)
+            } else {
+                // Remove from management first, so the swipe-freeze service cannot
+                // interfere, then unfreeze immediately.
+                HailData.removeCheckedApp(packageName)
+                AppManager.setAppFrozen(packageName, false)
+            }
+            withContext(Dispatchers.Main) {
+                // The button view may have been recycled while the operation ran.
+                appsAdapter.currentList.indexOfFirst { it.packageName == packageName }.takeIf { it >= 0 }
+                    ?.let(appsAdapter::notifyItemChanged)
+            }
+        }
     }
 
     override fun onCreateMenu(menu: Menu, inflater: MenuInflater) {
@@ -251,6 +252,8 @@ class AppsFragment : MainFragment(), AppsAdapter.OnItemClickListener, AppsAdapte
 
     override fun onMenuItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            R.id.action_select_all -> selectAllApps()
+            R.id.action_unselect_all -> unselectAllApps()
             R.id.sort_by_name -> changeAppsSort(HailData.SORT_NAME, item)
             R.id.sort_by_install -> changeAppsSort(HailData.SORT_INSTALL, item)
             R.id.sort_by_update -> changeAppsSort(HailData.SORT_UPDATE, item)
@@ -270,6 +273,39 @@ class AppsFragment : MainFragment(), AppsAdapter.OnItemClickListener, AppsAdapte
         item.isChecked = true
         HailData.changeAppsSort(sort)
         updateDisplayAppList()
+    }
+
+    /** Checks all apps in the current filtered list: manages them without freezing. */
+    private fun selectAllApps() {
+        model.displayApps.value.orEmpty().filter { !HailData.isChecked(it.packageName) }.forEach {
+            HailData.addCheckedApp(it.packageName, saveApps = false)
+        }
+        HailData.saveApps()
+        appsAdapter.notifyDataSetChanged()
+        app.setAutoFreezeService()
+    }
+
+    /** Unchecks every app, including ones hidden by filters: removes from management, then unfreezes. */
+    private fun unselectAllApps() {
+        val apps = HailData.checkedList.toList()
+        val act = activity
+        viewLifecycleOwner.lifecycleScope.launch {
+            val result = HBatch.run(
+                act, apps, R.string.action_unfreeze, label = { it.name }
+            ) {
+                HailData.removeCheckedApp(it.packageName, saveApps = false)
+                AppManager.setAppFrozen(it.packageName, false)
+            }
+            HailData.saveApps()
+            TempUnfrozenList.clear()
+            appsAdapter.notifyDataSetChanged()
+            app.setAutoFreezeService()  // stops the auto-freeze service: nothing is managed anymore
+            if (result.succeeded == 0 && result.failed > 0) HUI.showToast(R.string.permission_denied)
+            else HUI.showToast(
+                R.string.msg_unfreeze,
+                if (result.succeeded == 1) result.lastSucceeded else result.succeeded.toString()
+            )
+        }
     }
 
     private fun changeAppsFilter(filter: String, item: MenuItem) {
