@@ -13,7 +13,8 @@
   API action 变为 `io.github.AlexIllinois2.snub.action.*`，URI scheme 仍为 `hail://`。
 - **仅限 Root**：移除全部非 root 工作模式（Shizuku、Dhizuku、设备所有者、Island、特权应用及闲置模式），
   仅保留四种 Root 工作模式，默认为「Root - 停用」。应用启动时每进程一次性检查并申请所有所需权限：
-  root（su 授权弹窗）、通知权限与「使用情况访问」权限。
+  root（su 授权弹窗）与通知权限；「使用情况访问」为 AppOps 权限、无法通过弹窗申请，
+  授予 root 后会自动通过 `appops set` 自授权，失败时才回退到系统设置页手动开启。
 - **划掉自动冻结**：前台服务（仅 Root 工作模式）轮询最近任务屏幕，自动冻结所有不在最近任务中的受管应用，
   包括被划掉的应用和从未出现过的应用。轮询间隔、解冻后冻结延时等选项可在设置中配置，开机后自动恢复服务。
   仅匹配 `dumpsys activity recents` 中的现存任务条目，因此在 Android 14+ 等会把已划掉任务保留在

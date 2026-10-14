@@ -1,6 +1,7 @@
 package io.github.AlexIllinois2.snub.ui.main
 
 import android.Manifest
+import android.app.AppOpsManager
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -129,9 +130,16 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
             // Fires the su grant dialog once; runs off the main thread as su may block.
             val rootGranted = withContext(Dispatchers.IO) { HShell.checkSU }
             if (!rootGranted) HUI.showToast(R.string.permission_denied)
-            if (!HSystem.checkOpUsageStats(this@MainActivity)) startActivity(
-                Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            )
+            if (!HSystem.checkOpUsageStats(this@MainActivity)) {
+                // Usage access is an AppOps permission that cannot be requested via a dialog;
+                // self-grant it with root, falling back to the settings page on failure.
+                if (rootGranted) withContext(Dispatchers.IO) {
+                    HShell.setAppOpAllowed(packageName, AppOpsManager.OPSTR_GET_USAGE_STATS)
+                }
+                if (!HSystem.checkOpUsageStats(this@MainActivity)) startActivity(
+                    Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                )
+            }
         }
     }
 

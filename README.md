@@ -13,8 +13,10 @@ freeze Android apps. [GitHub Releases](https://github.com/AlexIllinois2/snub/rel
   API actions become `io.github.AlexIllinois2.snub.action.*`, while the URI scheme remains `hail://`.
 - **Root only**: all non-root working modes (Shizuku, Dhizuku, Device Owner, Island, priv-app and the
   idle mode) were removed; only the four Root working modes remain, with *Root - Disable* as the default.
-  On startup the app checks and requests all needed permissions once per process: root (su grant dialog),
-  notification permission and Usage access.
+  On startup the app checks and requests all needed permissions once per process: root (su grant dialog)
+  and notification permission. Usage access is an AppOps permission that cannot be requested via a dialog;
+  once root is granted the app self-grants it via `appops set`, falling back to the system settings page
+  only if that fails.
 - **Auto freeze on swipe**: a foreground service (Root working mode only) polls the recents screen and
   automatically freezes managed apps that are absent from recents, including apps swiped away or never seen.
   Polling interval, freeze delay after unfreeze and other options are configurable in Settings, and the
