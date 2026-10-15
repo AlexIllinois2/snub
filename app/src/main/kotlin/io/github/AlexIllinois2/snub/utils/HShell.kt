@@ -11,10 +11,14 @@ object HShell {
 
     fun execute(command: String, root: Boolean): Pair<Int, String?> = runCatching {
         ProcessBuilder(if (root) "su" else "sh").redirectErrorStream(true).start().run {
-            outputStream.use { it.write(command.toByteArray()) }
+            outputStream.use { it.write((if (root) "$envSetup$command" else command).toByteArray()) }
             waitFor() to inputStream.bufferedReader().use { it.readText() }.also { destroy() }
         }
     }.getOrElse { 1 to it.stackTraceToString() }
+
+    // Root shells on some ROMs (vivo Funtouch 3) clear the environment; the app_process backed
+    // commands (pm/am/appops/input) then abort inside libjavacore for want of ANDROID_DATA.
+    private val envSetup get() = "export ANDROID_DATA=\"${System.getenv("ANDROID_DATA") ?: "/data"}\"; "
 
     private fun execSU(command: String) = execute(command, true)
 
@@ -34,8 +38,11 @@ object HShell {
 
     fun forceStopApp(packageName: String): Boolean = execSU("am force-stop $userArg $packageName").first == 0
 
-    fun setAppDisabled(packageName: String, disabled: Boolean): Boolean =
-        execSU("pm ${if (disabled) "disable" else "enable"} $userArg $packageName").first == 0
+    fun setAppDisabled(packageName: String, disabled: Boolean): Boolean {
+        execSU("pm ${if (disabled) "disable" else "enable"} $userArg $packageName")
+        // su exits 0 even when pm aborts, so judge by the state pm left behind, not by the exit code.
+        return HPackages.isAppDisabled(packageName) == disabled
+    }
 
     fun setAppHidden(packageName: String, hidden: Boolean): Boolean =
         execSU("pm ${if (hidden) "hide" else "unhide"} $userArg $packageName").first == 0
