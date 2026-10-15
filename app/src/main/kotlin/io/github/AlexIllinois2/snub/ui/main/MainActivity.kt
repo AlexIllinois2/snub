@@ -17,6 +17,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.MenuCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.isVisible
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
@@ -42,6 +44,7 @@ import kotlinx.coroutines.withContext
 class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedListener {
     lateinit var fab: ExtendedFloatingActionButton
     lateinit var appbar: AppBarLayout
+    private lateinit var binding: ActivityMainBinding
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { requestRootAndUsageAccess() }
@@ -49,7 +52,16 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        val binding = initView()
+        binding = initView()
+        // Some OEM frameworks (Funtouch 3 / API 23) keep an XML-declared host below CREATED until the
+        // activity dispatches its own created state, and its NavController throws before that.
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navHostFragment.lifecycle.addObserver(object : DefaultLifecycleObserver {
+            override fun onCreate(owner: LifecycleOwner) {
+                owner.lifecycle.removeObserver(this)
+                setupNavigation(navHostFragment)
+            }
+        })
         // Check and request every needed permission once per app process start.
         if (!permissionsRequested) {
             permissionsRequested = true
@@ -86,16 +98,6 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
         fab = appBarMain.fab
         appbar = appBarMain.appBarLayout
 
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        val navController = navHostFragment.navController
-        navController.addOnDestinationChangedListener(this@MainActivity)
-        val appBarConfiguration = AppBarConfiguration.Builder(
-            R.id.nav_home, R.id.nav_apps, R.id.nav_settings, R.id.nav_about
-        ).build()
-        setupActionBarWithNavController(navController, appBarConfiguration)
-        bottomNav?.setupWithNavController(navController)
-        navRail?.setupWithNavController(navController)
-
         val isRtl = isRtl
         val isLandscape = isLandscape
         appBarMain.appBarLayout.applyDefaultInsetter {
@@ -104,6 +106,17 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
         bottomNav?.applyDefaultInsetter { paddingRelative(isRtl, start = true, end = true, bottom = true) }
         navRail?.applyDefaultInsetter { paddingRelative(isRtl, start = true, top = true, bottom = true) }
         fab.applyDefaultInsetter { marginRelative(isRtl, end = true, bottom = isLandscape) }
+    }
+
+    private fun setupNavigation(navHostFragment: NavHostFragment) {
+        val navController = navHostFragment.navController
+        navController.addOnDestinationChangedListener(this@MainActivity)
+        val appBarConfiguration = AppBarConfiguration.Builder(
+            R.id.nav_home, R.id.nav_apps, R.id.nav_settings, R.id.nav_about
+        ).build()
+        setupActionBarWithNavController(navController, appBarConfiguration)
+        binding.bottomNav?.setupWithNavController(navController)
+        binding.navRail?.setupWithNavController(navController)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
