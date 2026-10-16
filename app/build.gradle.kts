@@ -104,5 +104,4 @@ dependencies {
     implementation(libs.compose.preference)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.hiddenapibypass)
-    compileOnly(libs.libxposed.api)
 }

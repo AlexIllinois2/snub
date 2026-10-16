@@ -20,12 +20,6 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--dontwarn io.github.libxposed.annotation.**
--adaptresourcefilecontents META-INF/xposed/java_init.list
--keep,allowoptimization,allowobfuscation public class * extends io.github.libxposed.api.XposedModule {
-    public <init>();
-}
-
 # app_process entry for root-assisted silent shortcuts;
 # invoked from a root shell by its fully qualified name
 -keep class io.github.AlexIllinois2.snub.utils.RootShortcutSender {

@@ -130,6 +130,5 @@
     <string name="follow_system">Сістэмная</string>
     <string name="theme_light">Светлая</string>
     <string name="theme_dark">Цёмная</string>
-    <string name="xposed_description">Аўтаразмарожванне прыпыненых праграм ізаляванага профілю</string>
     <string name="fuzzy_search">Недакладны пошук</string>
 </resources>

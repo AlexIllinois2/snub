@@ -146,7 +146,6 @@
     <string name="mode_su_hide">Root - Hide</string>
     <string name="action_fdroid">F-Droid</string>
     <string name="action_skip">Skip</string>
-    <string name="xposed_description">Allow scoped apps to launch suspended apps</string>
     <string name="command">Command</string>
     <string name="tag">Tag</string>
     <string name="freeze_system_app">Freezing or uninstalling system applications may cause the device to bootloop. Make sure you know what you are doing and backup your data in advance or use recovery that supports file management.</string>

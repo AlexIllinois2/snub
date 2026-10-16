@@ -129,5 +129,4 @@
     <string name="follow_system">Segui il sistema</string>
     <string name="theme_light">Chiaro</string>
     <string name="theme_dark">Scuro</string>
-    <string name="xposed_description">Scongela automaticamente le app sospese (per le app selezionate)</string>
 </resources>

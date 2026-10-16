@@ -127,5 +127,4 @@
     <string name="follow_system">پی‌گرفتن سامانه</string>
     <string name="theme_light">روشن</string>
     <string name="theme_dark">تیره</string>
-    <string name="xposed_description">بازکردن خودکار برنامه‌های معلق شده برای برنامه‌های نشان شده</string>
 </resources>

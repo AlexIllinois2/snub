@@ -131,5 +131,4 @@
     <string name="compact_icon">Kompaktowe ikony</string>
     <string name="action_biometric">Odblokowywanie biometryczne</string>
     <string name="msg_biometric">Zaloguj używając twoich danych biometrycznych</string>
-    <string name="xposed_description">Automatycznie odmróź aplikacje w określonym zakresie</string>
 </resources>

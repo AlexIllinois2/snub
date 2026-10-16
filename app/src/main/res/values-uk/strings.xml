@@ -131,7 +131,6 @@
     <string name="follow_system">Як в системі</string>
     <string name="theme_light">Світла</string>
     <string name="theme_dark">Темна</string>
-    <string name="xposed_description">Дозволити ізольованим застосункам запускати призупинені застосунки</string>
     <string name="donate_kofi">Ko-fi</string>
     <string name="state_running">Запущено</string>
     <string name="state_disabled">Вимкнено</string>

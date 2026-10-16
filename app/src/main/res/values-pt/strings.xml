@@ -129,5 +129,4 @@
     <string name="follow_system">Usar definição do sistema</string>
     <string name="theme_light">Claro</string>
     <string name="theme_dark">Escuro</string>
-    <string name="xposed_description">Automaticamente descongelar apps suspensas para as apps em âmbito</string>
 </resources>
