@@ -2,8 +2,6 @@ package io.github.AlexIllinois2.snub.services
 
 import android.app.Notification
 import android.app.PendingIntent
-import android.app.usage.UsageEvents
-import android.app.usage.UsageStats
 import android.content.Intent
 import android.content.IntentFilter
 import android.service.notification.NotificationListenerService
@@ -16,7 +14,6 @@ import io.github.AlexIllinois2.snub.app.AppManager
 import io.github.AlexIllinois2.snub.app.HailApi
 import io.github.AlexIllinois2.snub.app.HailData
 import io.github.AlexIllinois2.snub.receiver.ScreenOffReceiver
-import io.github.AlexIllinois2.snub.utils.HShell
 import io.github.AlexIllinois2.snub.utils.HSystem
 import io.github.AlexIllinois2.snub.utils.HUI
 import kotlinx.coroutines.CoroutineScope
@@ -33,18 +30,8 @@ class AutoFreezeService : NotificationListenerService() {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val lastForegroundTime = mutableMapOf<String, Long>()
 
-    // Package to (last event timestamp, whether its activity is currently resumed),
-    // maintained incrementally from UsageEvents, as aggregated UsageStats may lag
-    // and keep a backgrounded app as the most recently used one forever.
-    private val resumedStates = mutableMapOf<String, Pair<Long, Boolean>>()
-    private var eventQueryStart = 0L
-    private var eventsSeen = false
-    private var usageAccessHintShown = false
-    private var usageAccessWarned = false
-
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         createNotificationChannel()
-        usageAccessWarned = !HSystem.checkOpUsageStats(this)
         startForeground(100, buildNotification())
         return START_STICKY
     }
@@ -73,18 +60,8 @@ class AutoFreezeService : NotificationListenerService() {
             delay(10_000)
             val bgTagIds = HailData.tags.filter { it.autoFreezeBackground }.map { it.id }.toSet()
             if (bgTagIds.isEmpty()) continue
-            val hasUsageAccess = HSystem.checkOpUsageStats(this@AutoFreezeService)
-            updateUsageAccessWarning(hasUsageAccess)
-            if (!hasUsageAccess) {
-                if (!usageAccessHintShown) {
-                    usageAccessHintShown = true
-                    HUI.showToast(R.string.auto_freeze_usage_access, isLengthLong = true)
-                }
-                continue
-            }
             val now = System.currentTimeMillis()
-            val foregroundPkg = trackForegroundPackage(now)
-            val usage: List<UsageStats>? by lazy { HSystem.queryUsageStats(this) }  // queried once if needed
+            val foregroundPkg = HSystem.getForegroundPackageName()
             val charging = HailData.skipWhileCharging && HSystem.isCharging(this)
             val notifying = if (HailData.skipNotifyingApp) activeNotifications.map {
                 it.packageName
@@ -99,9 +76,9 @@ class AutoFreezeService : NotificationListenerService() {
                     lastForegroundTime[pkg] = now
                 } else {
                     val tag = HailData.tags.find { it.id == appInfo.tagId } ?: return@forEach
-                    val since = lastForegroundTime[pkg]
-                        ?: usage?.filter { it.packageName == pkg }?.maxOfOrNull { it.lastTimeUsed }
-                        ?: 0L
+                    // Unknown "last foreground" (e.g. backgrounded before this service started)
+                    // is treated as just now, so the delay always applies before freezing.
+                    val since = lastForegroundTime[pkg] ?: now
                     if (now - since >= tag.autoFreezeBackgroundDelay * 1000) {
                         if (!AppManager.setAppFrozen(pkg, true)) {
                             HUI.showToast(R.string.permission_denied)
@@ -110,54 +87,6 @@ class AutoFreezeService : NotificationListenerService() {
                 }
             }
         }
-    }
-
-    /**
-     * Returns the package whose activity is currently resumed, or null when none is (e.g. on
-     * the home screen or lock screen), which makes every background policy app eligible.
-     *
-     * Queries the live resumed activity first: UsageEvents may be delivered with long delays
-     * (or not at all) on some ROMs, leaving the tracked state stale and blocking the freeze.
-     * Falls back to incremental UsageEvents replay when dumpsys output is unavailable.
-     */
-    private fun trackForegroundPackage(now: Long): String? {
-        val resumed = HShell.execute(RESUMED_ACTIVITY_COMMAND, true).second.orEmpty()
-        if (resumed.isNotBlank()) return RESUMED_ACTIVITY_REGEX.find(resumed)?.groupValues?.getOrNull(1)
-        return trackForegroundViaEvents(now)
-    }
-
-    private fun trackForegroundViaEvents(now: Long): String? {
-        val start = if (eventQueryStart == 0L) now - EVENT_PRIME_WINDOW else eventQueryStart - EVENT_QUERY_OVERLAP
-        eventQueryStart = now
-        val batch = mutableListOf<Triple<Long, String, Int>>()
-        val event = UsageEvents.Event()
-        HSystem.queryUsageEvents(this, start, now)?.run {
-            while (hasNextEvent()) {
-                getNextEvent(event)
-                // ACTIVITY_RESUMED/ACTIVITY_PAUSED equal MOVE_TO_FOREGROUND/MOVE_TO_BACKGROUND on older versions
-                if (event.eventType == UsageEvents.Event.ACTIVITY_RESUMED
-                    || event.eventType == UsageEvents.Event.ACTIVITY_PAUSED
-                ) batch.add(Triple(event.timeStamp, event.packageName, event.eventType))
-            }
-        }
-        if (batch.isEmpty() && !eventsSeen) return HSystem.queryUsageStats(this)
-            ?.maxByOrNull { it.lastTimeUsed }?.packageName  // ROM delivers no events
-        eventsSeen = true
-        batch.sortBy { it.first }
-        batch.forEach { (timeStamp, pkg, type) ->
-            val state = resumedStates[pkg]
-            if (state == null || timeStamp >= state.first) {
-                resumedStates[pkg] = timeStamp to (type == UsageEvents.Event.ACTIVITY_RESUMED)
-            }
-        }
-        return resumedStates.filter { it.value.second }.maxByOrNull { it.value.first }?.key
-    }
-
-    /** Reflects missing usage access in the persistent notification, as a one-shot toast is easy to miss. */
-    private fun updateUsageAccessWarning(hasUsageAccess: Boolean) {
-        if (hasUsageAccess == usageAccessWarned) return
-        usageAccessWarned = !hasUsageAccess
-        NotificationManagerCompat.from(this).notify(100, buildNotification())
     }
 
     private fun buildNotification(): Notification {
@@ -181,7 +110,6 @@ class AutoFreezeService : NotificationListenerService() {
                 freezeNonWhitelisted
             )
         }
-        if (usageAccessWarned) notification.setContentText(getString(R.string.auto_freeze_usage_access))
         return notification.build()
     }
 
@@ -202,12 +130,5 @@ class AutoFreezeService : NotificationListenerService() {
         /** Null when the service has never been created in this process. */
         val instanceOrNull: AutoFreezeService?
             get() = if (::instance.isInitialized) instance else null
-
-        private const val EVENT_PRIME_WINDOW = 24 * 60 * 60 * 1000L
-        private const val EVENT_QUERY_OVERLAP = 60 * 1000L
-
-        private const val RESUMED_ACTIVITY_COMMAND =
-            "dumpsys activity activities 2>/dev/null | grep -m1 -E 'topResumedActivity=|mResumedActivity=|ResumedActivity:'"
-        private val RESUMED_ACTIVITY_REGEX = Regex("u\\d+ ([a-zA-Z0-9._]+)")
     }
 }

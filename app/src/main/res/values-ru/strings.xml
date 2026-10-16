@@ -115,7 +115,6 @@
     <string name="icon_pack">Пакет иконок</string>
     <string name="action_select_all">Выбрать все</string>
     <string name="action_terminal">Терминал</string>
-    <string name="action_skip">Пропустить</string>
     <string name="mode_su_hide">Root - Скрыть</string>
     <string name="action_fdroid">F-Droid</string>
     <string name="freeze_system_app">Заморозка или удаление системных приложений может привести к бутлупу. Убедитесь, что вы знаете, что делаете, и заранее сделайте резервную копию своих данных или используйте рекавери, поддерживающее управление файлами.</string>

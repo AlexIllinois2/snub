@@ -108,7 +108,6 @@
     <string name="command">Каманда</string>
     <string name="home_font_size">Памер шрыфта на галоўнай старонцы</string>
     <string name="mode_su_hide">Root - Схаваць</string>
-    <string name="action_skip">Прапусціць</string>
     <plurals name="deferred_task_entry">
         <item quantity="one">%d хвіліна</item>
         <item quantity="few">%d хвіліны</item>

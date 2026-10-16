@@ -36,12 +36,6 @@
     <string name="msg_adding_shortcuts">Requested %1$s/%2$s</string>
     <string name="msg_shortcuts_requested">Requested shortcuts for %1$s apps</string>
     <string name="msg_shortcuts_none">No eligible apps. Only frozen apps with a launcher activity can be added.</string>
-    <string name="action_add_shortcuts_silent">Add shortcuts for apps without one (silent)</string>
-    <string name="action_add_shortcuts_interactively">Interactive add</string>
-    <string name="action_add_shortcuts_silently">Silent add</string>
-    <string name="msg_add_silent_shortcuts">Home screen shortcuts will be created for %1$s apps. Choose interactive adding (a confirmation dialog per app) or silent adding without dialogs, which needs launcher support.</string>
-    <string name="msg_silent_shortcuts_failed">Silent creation failed for %1$s apps. You can interactively add them instead.</string>
-    <string name="msg_shortcuts_created">Created silent shortcuts for %1$s apps</string>
     <string name="action_export_clipboard">Export to Clipboard</string>
     <string name="action_import_clipboard">Import from Clipboard</string>
     <string name="action_remove_home">Remove from Home</string>
@@ -100,7 +94,6 @@
     <string name="auto_freeze_notification_title">Auto freeze service is running</string>
     <string name="auto_freeze_after_lock">After screen locked</string>
     <string name="auto_freeze_background">After going to background</string>
-    <string name="auto_freeze_usage_access">Background auto-freeze requires the Usage access permission for Snub.</string>
     <string name="freeze_immediately">Freeze immediately</string>
     <string name="seconds_format">%d s</string>
     <string name="skip_while_charging">Skip while charging</string>
@@ -134,7 +127,6 @@
     <string name="low_battery_cancelled">Auto shutdown cancelled</string>
     <string name="low_battery_channel_alert">Shutdown countdown</string>
     <string name="title_shortcuts">Shortcuts</string>
-    <string name="auto_shortcut_new_apps">Create shortcuts for newly managed apps (silent)</string>
     <string name="dynamic_shortcut_action">Dynamic shortcut action</string>
     <string name="action_none">None</string>
     <string name="action_freeze_tag">Freeze tag</string>
@@ -145,7 +137,6 @@
     <string name="action_terminal">Terminal</string>
     <string name="mode_su_hide">Root - Hide</string>
     <string name="action_fdroid">F-Droid</string>
-    <string name="action_skip">Skip</string>
     <string name="command">Command</string>
     <string name="tag">Tag</string>
     <string name="freeze_system_app">Freezing or uninstalling system applications may cause the device to bootloop. Make sure you know what you are doing and backup your data in advance or use recovery that supports file management.</string>

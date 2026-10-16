@@ -111,7 +111,6 @@
     <string name="action_details">Uygulama bilgisi</string>
     <string name="activity_not_found">Başlatma etkinliği bulunamadı</string>
     <string name="action_terminal">Terminal</string>
-    <string name="action_skip">Atla</string>
     <string name="mode_su_hide">Root - Gizle</string>
     <string name="action_fdroid">F-Droid</string>
     <string name="command">Komut</string>

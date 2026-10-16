@@ -60,8 +60,4 @@ object HShell {
     fun setAppRestricted(packageName: String, restricted: Boolean) = execSU(
         "appops set $userArg $packageName RUN_ANY_IN_BACKGROUND ${if (restricted) "ignore" else "allow"}"
     ).first == 0
-
-    /** Grants an AppOps permission (e.g. GET_USAGE_STATS) to [packageName] with root. */
-    fun setAppOpAllowed(packageName: String, op: String): Boolean =
-        execSU("appops set $userArg $packageName $op allow").first == 0
 }

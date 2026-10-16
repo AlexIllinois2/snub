@@ -115,7 +115,6 @@
     <string name="filter_unfrozen_apps">Descongelados</string>
     <string name="donate_wechat_scan">Escanear</string>
     <string name="action_remove_whitelist">Remover da lista de permissões</string>
-    <string name="action_skip">Pular</string>
     <string name="tag">Tag</string>
     <string name="freeze_system_app">Congelar ou desinstalar aplicativos do sistema pode fazer com que o dispositivo entre em bootloop. Certifique-se de saber o que está fazendo e faça backup dos seus dados com antecedência ou use recuperação que suporte gerenciamento de arquivos.</string>
     <string name="fuzzy_search">Pesquisa Fuzzy</string>

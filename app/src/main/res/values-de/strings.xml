@@ -116,7 +116,6 @@
     <string name="action_continue">Fortsetzen</string>
     <string name="mode_su_hide">Root - Verstecken (Hide)</string>
     <string name="action_fdroid">F-Droid</string>
-    <string name="action_skip">Überspringen</string>
     <string name="freeze_system_app">System-Apps einzufrieren kann einen Bootloop verursachen. Vergewissern Sie sich, dass Sie wissen was Sie tun und machen Sie vorher ein Backup Ihrer Daten, oder verwenden Sie ein Recovery-Werkzeug welches Dateimanagement unterstützt.</string>
     <string name="mode_su_stop">Root - Beenden erzwingen</string>
     <string name="nine_key">T9-Suche</string>

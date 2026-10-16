@@ -41,7 +41,6 @@ import io.github.AlexIllinois2.snub.R
 import io.github.AlexIllinois2.snub.app.AppInfo
 import io.github.AlexIllinois2.snub.app.AppManager
 import io.github.AlexIllinois2.snub.app.HailApi
-import io.github.AlexIllinois2.snub.app.HailApi.addTag
 import io.github.AlexIllinois2.snub.app.HailData
 import io.github.AlexIllinois2.snub.app.Tag
 import io.github.AlexIllinois2.snub.databinding.FragmentPagerBinding
@@ -100,7 +99,7 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
                     super.onScrollStateChanged(recyclerView, newState)
                     when (newState) {
                         RecyclerView.SCROLL_STATE_IDLE -> activity.fab.run {
-                            postDelayed({ if (tag != null) show() }, 1000)
+                            postDelayed({ if (!frozenTab) show() }, 1000)
                         }
 
                         RecyclerView.SCROLL_STATE_DRAGGING -> activity.fab.hide()
@@ -132,13 +131,21 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
                 true
             }
         }
-        activity.fab.setOnClickListener {
-            if (frozenTab) setListFrozen(false, pagerAdapter.currentList)
-            else setListFrozen(true, pagerAdapter.currentList.filterNot { it.whitelisted })
-        }
-        activity.fab.setOnLongClickListener {
-            setListFrozen(true)
-            true
+        // The frozen tab has no floating button: unfreezing is per-app there,
+        // and a one-tap "freeze everything listed" would be dangerous.
+        if (frozenTab) {
+            activity.fab.setOnClickListener(null)
+            activity.fab.setOnLongClickListener(null)
+            activity.fab.hide()
+        } else {
+            activity.fab.setOnClickListener {
+                setListFrozen(true, pagerAdapter.currentList.filterNot { it.whitelisted })
+            }
+            activity.fab.setOnLongClickListener {
+                setListFrozen(true)
+                true
+            }
+            activity.fab.show()
         }
     }
 
@@ -272,21 +279,7 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
 
                 5 -> tagDialog(info)
 
-                6 -> tabs?.takeIf { it.tabCount > 1 }?.let {
-                    MaterialAlertDialogBuilder(requireActivity()).setTitle(R.string.action_unfreeze_tag)
-                        .setItems(HailData.tags.map { it.name }.toTypedArray()) { _, index ->
-                            HShortcuts.addPinShortcut(
-                                info,
-                                pkg,
-                                info.name,
-                                HailApi.getIntentForPackage(HailApi.ACTION_LAUNCH, pkg).addTag(HailData.tags[index].name)
-                            )
-                        }.setPositiveButton(R.string.action_skip) { _, _ ->
-                            HShortcuts.addPinShortcut(
-                                info, pkg, info.name, HailApi.getIntentForPackage(HailApi.ACTION_LAUNCH, pkg)
-                            )
-                        }.setNegativeButton(android.R.string.cancel, null).show()
-                } ?: HShortcuts.addPinShortcut(
+                6 -> HShortcuts.addPinShortcut(
                     info, pkg, info.name, HailApi.getIntentForPackage(HailApi.ACTION_LAUNCH, pkg)
                 )
 
@@ -469,40 +462,6 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
         delay(settleMillis) // Gap before the next dialog
     }
 
-    /**
-     * Adds home screen shortcuts for managed frozen apps that don't have one, offering
-     * interactive (per-app launcher confirmation dialogs) and silent creation.
-     * Apps without a pinned shortcut are detected on each run; silent shortcuts already
-     * on the home screen are deduplicated by the launcher via the "duplicate" extra.
-     * When some silent broadcasts are not delivered, the user is asked whether to
-     * interactively add the remaining apps instead.
-     */
-    private fun createSilentShortcuts() {
-        val apps = HailData.checkedList.filter {
-            it.packageName != BuildConfig.APPLICATION_ID && it.applicationInfo != null
-                    && AppManager.isAppFrozen(it.packageName) && it.hasLauncherActivity()
-                    && !HShortcuts.hasPinnedShortcut(it.packageName)
-        }
-        if (apps.isEmpty()) HUI.showToast(R.string.msg_shortcuts_none)
-        else MaterialAlertDialogBuilder(activity).setTitle(R.string.action_add_shortcuts_silent)
-            .setMessage(getString(R.string.msg_add_silent_shortcuts, apps.size.toString()))
-            .setPositiveButton(R.string.action_add_shortcuts_interactively) { _, _ ->
-                requestShortcuts(apps)
-            }.setNeutralButton(R.string.action_add_shortcuts_silently) { _, _ ->
-                viewLifecycleOwner.lifecycleScope.launch {
-                    val undelivered = HShortcuts.createSilentShortcuts(apps)
-                    if (undelivered.isEmpty()) HUI.showToast(
-                        getString(R.string.msg_shortcuts_created, apps.size.toString())
-                    ) else MaterialAlertDialogBuilder(activity)
-                        .setTitle(R.string.action_add_shortcuts_silent)
-                        .setMessage(getString(R.string.msg_silent_shortcuts_failed, undelivered.size.toString()))
-                        .setPositiveButton(R.string.action_add_shortcuts_interactively) { _, _ ->
-                            requestShortcuts(undelivered)
-                        }.setNegativeButton(android.R.string.cancel, null).show()
-                }
-            }.setNegativeButton(android.R.string.cancel, null).show()
-    }
-
     private fun singleTagDialog() {
         val initialIndex =
             if (selectedList.all { it.tagId == selectedList.first().tagId }) HailData.tags.indexOfFirst { it.id == selectedList.first().tagId }
@@ -563,11 +522,11 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
     private fun showTagDialog(list: List<AppInfo>? = null) {
         val tabLayout = tabs ?: return  // The view has been destroyed; return directly.
         val homeAdapter = adapter ?: return
-        // Tab position 0 is the virtual frozen tab, which is not a tag to edit.
+        // The virtual frozen tab is fixed at the end; user tags map 1:1 to tab positions.
         val tabPosition = tabLayout.selectedTabPosition
-        val tagIndex = tabPosition - 1 // Index into HailData.tags
-        if (list == null && tagIndex < 0) return
+        val tagIndex = tabPosition // Index into HailData.tags
         val currentTag = if (list == null) HailData.tags.getOrNull(tagIndex) else null
+        if (list == null && currentTag == null) return
 
         val bgState = mutableStateOf(currentTag?.autoFreezeBackground ?: false)
         val bgDelayState = mutableStateOf(currentTag?.autoFreezeBackgroundDelay ?: 0f)
@@ -637,7 +596,8 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
                             newName, tagId, bgState.value, bgDelayState.value, lockState.value, lockDelayState.value
                         )
                     )
-                    homeAdapter.notifyItemInserted(homeAdapter.itemCount - 1)
+                    // New tag lands before the fixed frozen tab, which is always the last one.
+                    homeAdapter.notifyItemInserted(homeAdapter.itemCount - 2)
                     HailData.saveTags()
                     app.setAutoFreezeService()
                     if (list == selectedList) singleTagDialog() else tagDialog(list.first())
@@ -814,7 +774,6 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
 
             R.id.action_export_current -> exportToClipboard(pagerAdapter.currentList)
             R.id.action_export_all -> exportToClipboard(HailData.checkedList)
-            R.id.action_add_shortcuts_silent -> createSilentShortcuts()
         }
         return false
     }

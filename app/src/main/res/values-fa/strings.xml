@@ -106,7 +106,6 @@
     <string name="action_select_all">انتخاب همه</string>
     <string name="mode_su_hide">روت - پنهان کردن</string>
     <string name="action_fdroid">F-Droid</string>
-    <string name="action_skip">رد کردن</string>
     <string name="permission_denied">اجازه رد شد</string>
     <string name="activity_not_found">فعالیت راه اندازی یافت نشد</string>
     <string name="skip_while_charging">رد کردن هنگام شارژ</string>

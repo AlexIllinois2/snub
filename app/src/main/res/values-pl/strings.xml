@@ -98,7 +98,6 @@
     <string name="action_terminal">Terminal</string>
     <string name="mode_su_hide">Root - Ukryj</string>
     <string name="action_fdroid">F-Droid</string>
-    <string name="action_skip">Pomiń</string>
     <string name="command">Polecenie</string>
     <string name="tag">Etykieta</string>
     <string name="freeze_system_app">Zamrożenie lub usunięcie systemowych aplikacji może powodować zawieszenie systemu po ponownym uruchomieniu. Upewnij się, że wiesz co robisz i utwórz wcześniej kopie zapasowe, lub użyj trybu odzyskiwania który pozwala zarządzać plikami.</string>

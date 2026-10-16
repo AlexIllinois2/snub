@@ -110,7 +110,6 @@
     <string name="action_select_all">Elekti ĉiujn</string>
     <string name="action_terminal">Terminalo</string>
     <string name="mode_su_hide">Root - Kaŝi</string>
-    <string name="action_skip">Preterlasi</string>
     <string name="command">Komando</string>
     <string name="tag">Etikedo</string>
     <string name="freeze_system_app">Frostigi aŭ malinstali sistemajn aplikaĵojn povas kaŭzi bukloripeton de la aparato. Certigu, ke vi scias, kion vi faras, kaj antaŭe sekurigu viajn datumojn aŭ uzu reakiran reĝimon, kiu subtenas dosieradministradon.</string>

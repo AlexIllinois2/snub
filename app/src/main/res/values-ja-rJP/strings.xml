@@ -117,7 +117,6 @@
     <string name="theme_light">ライト</string>
     <string name="action_reinstall">再インストール</string>
     <string name="theme_dark">ダーク</string>
-    <string name="action_skip">スキップ</string>
     <string name="tag">タグ</string>
     <string name="action_continue">続行</string>
     <string name="home_font_size">ホームのフォントサイズ</string>

@@ -115,7 +115,6 @@
     <string name="icon_pack">Пакет значків</string>
     <string name="action_select_all">Вибрати все</string>
     <string name="action_terminal">Термінал</string>
-    <string name="action_skip">Пропустити</string>
     <string name="mode_su_hide">Root - Прихововати</string>
     <string name="action_fdroid">F-Droid</string>
     <string name="command">Команда</string>

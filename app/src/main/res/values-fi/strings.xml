@@ -106,7 +106,6 @@
     <string name="action_fdroid">F-Droid</string>
     <string name="synthesize_adaptive_icons">Syntetisoi mukautuvia kuvakkeita</string>
     <string name="skip_notifying_app">Ohita ilmoitussovellus</string>
-    <string name="action_skip">Ohita</string>
     <string name="action_continue">Jatka</string>
     <string name="action_export_all">Vie kaikki</string>
     <string name="freeze_system_app">Järjestelmäsovellusten jäädyttäminen tai asennuksen poistaminen voi aiheuttaa laitteen käynnistyssilmukan. Varmista, että tiedät mitä olet tekemässä ja varmuuskopioi tiedot etukäteen tai käytä palautusta, joka tukee tiedostonhallintaa.</string>

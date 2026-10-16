@@ -115,7 +115,6 @@
     <string name="action_terminal">Terminal</string>
     <string name="mode_su_hide">Root - Ocultar</string>
     <string name="action_fdroid">F-Droid</string>
-    <string name="action_skip">Omitir</string>
     <string name="command">Comando</string>
     <string name="tag">Etiqueta</string>
     <string name="freeze_system_app">Congelar o desinstalar aplicaciones del sistema puede causar un bucle de arranque (bootloop) en el dispositivo. Asegúrate de saber lo que haces y realiza una copia de seguridad de tus datos con antelación, o utiliza un modo de recuperación (recovery) que admita gestión de archivos.</string>

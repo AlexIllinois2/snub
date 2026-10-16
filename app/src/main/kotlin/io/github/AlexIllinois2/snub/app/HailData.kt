@@ -6,7 +6,6 @@ import io.github.AlexIllinois2.snub.BuildConfig
 import io.github.AlexIllinois2.snub.HailApp.Companion.app
 import io.github.AlexIllinois2.snub.R
 import io.github.AlexIllinois2.snub.utils.HFiles
-import io.github.AlexIllinois2.snub.utils.HShortcuts
 import io.github.AlexIllinois2.snub.utils.TempUnfrozenList
 import org.json.JSONArray
 import org.json.JSONObject
@@ -41,8 +40,8 @@ object HailData {
     /** Id of the virtual home tab that lists every frozen app, managed or not. */
     const val FROZEN_TAB_ID = -1
 
-    /** The virtual frozen tab followed by the user-defined tags. */
-    val displayTags: List<Tag> get() = listOf(Tag(app.getString(R.string.tab_frozen), FROZEN_TAB_ID)) + tags
+    /** The user-defined tags followed by the virtual frozen tab fixed at the end. */
+    val displayTags: List<Tag> get() = tags + Tag(app.getString(R.string.tab_frozen), FROZEN_TAB_ID)
     private const val KEY_TAGS = "tags"
     private const val KEY_AUTO_FREEZE_BACKGROUND = "auto_freeze_background"
     private const val KEY_AUTO_FREEZE_BACKGROUND_DELAY = "auto_freeze_background_delay"
@@ -122,7 +121,6 @@ object HailData {
         ACTION_LOCK,
         ACTION_LOCK_FREEZE
     )
-    const val AUTO_SHORTCUT_NEW_APPS = "auto_shortcut_new_apps"
 
     private val sp = PreferenceManager.getDefaultSharedPreferences(app)
     val sortBy get() = sp.getString(SORT_BY, SORT_NAME)
@@ -160,7 +158,6 @@ object HailData {
     val lowBatteryLevel get() = sp.getFloat(LOW_BATTERY_LEVEL, 5f).toInt()
     val lowBatteryNotifySeconds get() = sp.getFloat(LOW_BATTERY_NOTIFY_SECONDS, 30f).toLong()
     val dynamicShortcutAction get() = sp.getString(DYNAMIC_SHORTCUT_ACTION, ACTION_NONE)!!
-    val autoShortcutNewApps get() = sp.getBoolean(AUTO_SHORTCUT_NEW_APPS, false)
 
     private val dir = "${app.filesDir.path}/v1"
     private val appsPath = "$dir/apps.json"
@@ -194,7 +191,6 @@ object HailData {
     fun addCheckedApp(packageName: String, tagId: Int = 0, saveApps: Boolean = true) {
         checkedList.add(AppInfo(packageName, tagId = tagId))
         if (saveApps) saveApps()
-        HShortcuts.autoCreateSilentShortcut(packageName)
     }
 
     fun removeCheckedApp(packageName: String, saveApps: Boolean = true) {

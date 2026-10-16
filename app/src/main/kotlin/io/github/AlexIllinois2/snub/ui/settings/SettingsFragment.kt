@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.outlined.AddToHomeScreen
 import androidx.compose.material.icons.automirrored.outlined.ManageSearch
 import androidx.compose.material.icons.automirrored.outlined.Shortcut
 import androidx.compose.material.icons.outlined.*
@@ -181,12 +180,6 @@ class SettingsFragment : MainFragment(), MenuProvider {
             switchPreference(
                 key = HailData.SKIP_FOREGROUND_APP,
                 defaultValue = false,
-                onValueChange = { _, value ->
-                    if (value && !HSystem.checkOpUsageStats(requireContext())) {
-                        startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-                        false
-                    } else true
-                },
                 titleId = R.string.skip_foreground_app,
                 enabled = HailData.anyAutoFreezePolicy,
                 icon = Icons.Outlined.Android
@@ -274,12 +267,6 @@ class SettingsFragment : MainFragment(), MenuProvider {
             )
             horizontalDivider()
             preferenceCategory(key = "shortcuts", title = { Text(text = stringResource(R.string.title_shortcuts)) })
-            switchPreference(
-                key = HailData.AUTO_SHORTCUT_NEW_APPS,
-                defaultValue = false,
-                titleId = R.string.auto_shortcut_new_apps,
-                icon = Icons.AutoMirrored.Outlined.AddToHomeScreen
-            )
             preference(
                 key = "add_pin_shortcut",
                 title = { Text(text = stringResource(R.string.action_add_pin_shortcut)) },

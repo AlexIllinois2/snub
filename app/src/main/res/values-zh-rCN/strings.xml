@@ -35,12 +35,6 @@
     <string name="msg_adding_shortcuts">已请求 %1$s/%2$s</string>
     <string name="msg_shortcuts_requested">已请求为 %1$s 个应用创建快捷方式</string>
     <string name="msg_shortcuts_none">没有符合条件的应用，仅支持已冻结且有启动页的应用。</string>
-    <string name="action_add_shortcuts_silent">全部添加到主屏幕</string>
-    <string name="action_add_shortcuts_interactively">交互式添加</string>
-    <string name="action_add_shortcuts_silently">静默添加</string>
-    <string name="msg_add_silent_shortcuts">将为 %1$s 个应用创建桌面快捷方式。可选择交互式添加（逐个弹出确认框）或静默添加（不弹框，需要桌面支持）。</string>
-    <string name="msg_silent_shortcuts_failed">有 %1$s 个应用未能静默创建快捷方式，可以继续选择交互式添加。</string>
-    <string name="msg_shortcuts_created">已为 %1$s 个应用静默创建快捷方式</string>
     <string name="action_export_clipboard">导出到剪切板</string>
     <string name="action_import_clipboard">从剪切板导入</string>
     <string name="action_remove_home">从首页中移除</string>
@@ -94,7 +88,6 @@
     <string name="auto_freeze_notification_title">自动冻结服务正在运行</string>
     <string name="auto_freeze_after_lock">锁屏后</string>
     <string name="auto_freeze_background">后台后自动冻结</string>
-    <string name="auto_freeze_usage_access">后台自动冻结需要授予 Snub“使用情况访问”权限。</string>
     <string name="freeze_immediately">立即冻结</string>
     <string name="seconds_format">%d 秒</string>
     <string name="skip_while_charging">仅未充电时</string>
@@ -130,7 +123,6 @@
     <string name="mode_su_suspend">Root - 暂停</string>
     <string name="action_freeze_non_whitelisted">冻结非白名单</string>
     <string name="title_shortcuts">快捷方式</string>
-    <string name="auto_shortcut_new_apps">为新管理的应用自动创建快捷方式（静默）</string>
     <string name="dynamic_shortcut_action">动态快捷方式行为</string>
     <string name="action_none">无</string>
     <string name="action_freeze_tag">标签冻结</string>
@@ -141,7 +133,6 @@
     <string name="action_terminal">终端</string>
     <string name="mode_su_hide">Root - 隐藏</string>
     <string name="action_fdroid">F-Droid</string>
-    <string name="action_skip">跳过</string>
     <string name="freeze_system_app">冻结或卸载系统应用可能导致设备无法启动。请确保您已知晓操作后果，并提前备份数据或使用支持文件管理的恢复模式。</string>
     <string name="action_continue">继续</string>
     <string name="command">命令</string>

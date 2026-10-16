@@ -1,7 +1,5 @@
 package io.github.AlexIllinois2.snub.utils
 
-import android.app.AppOpsManager
-import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -23,37 +21,20 @@ object HSystem {
         return status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL
     }
 
-    @Suppress("SameParameterValue")
-    private fun checkOp(context: Context, op: String): Boolean {
-        val opsManager = context.getSystemService<AppOpsManager>()!!
-        val result = if (HTarget.Q) {
-            opsManager.unsafeCheckOp(op, android.os.Process.myUid(), context.packageName)
-        } else {
-            @Suppress("DEPRECATION")
-            opsManager.checkOp(op, android.os.Process.myUid(), context.packageName)
-        }
-        return result == AppOpsManager.MODE_ALLOWED
-    }
-
-    fun checkOpUsageStats(context: Context): Boolean =
-        checkOp(context, AppOpsManager.OPSTR_GET_USAGE_STATS)
-
-    fun queryUsageStats(context: Context) = context.getSystemService<UsageStatsManager>()!!.run {
-        val now = System.currentTimeMillis()
-        queryUsageStats(UsageStatsManager.INTERVAL_BEST, now - 1000 * 60 * 60, now)  // to ensure that we can get the last app used
-    }
-
     /**
-     * Queries activity usage events in [start, end] for foreground tracking.
-     * Unlike aggregated [queryUsageStats], events are delivered near real-time,
-     * so a backgrounded app is no longer mistaken for the foreground app.
+     * Returns the package whose activity is currently resumed, or null when none is
+     * (e.g. on the home screen or lock screen). Queried live as root via dumpsys:
+     * aggregated UsageStats and UsageEvents may lag for a long time (or not be
+     * delivered at all) on some ROMs, and usage access permission is not required.
      */
-    fun queryUsageEvents(context: Context, start: Long, end: Long) =
-        runCatching { context.getSystemService<UsageStatsManager>()!!.queryEvents(start, end) }.getOrNull()
+    fun getForegroundPackageName(): String? = HShell.execute(
+        "dumpsys activity activities 2>/dev/null | grep -m1 -E 'topResumedActivity=|mResumedActivity=|ResumedActivity:'",
+        true
+    ).second.orEmpty().let { output ->
+        RESUMED_ACTIVITY_REGEX.find(output)?.groupValues?.getOrNull(1)
+    }
 
-    fun getForegroundPackageName(context: Context): String? =
-        queryUsageStats(context)?.maxByOrNull { it.lastTimeUsed }?.packageName
+    fun isForegroundApp(packageName: String): Boolean = getForegroundPackageName() == packageName
 
-    fun isForegroundApp(context: Context, packageName: String): Boolean =
-        getForegroundPackageName(context) == packageName
+    private val RESUMED_ACTIVITY_REGEX = Regex("u\\d+ ([a-zA-Z0-9._]+)")
 }

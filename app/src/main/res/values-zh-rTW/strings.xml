@@ -111,7 +111,6 @@
     <string name="action_terminal">終端機</string>
     <string name="mode_su_hide">Root - 隱藏</string>
     <string name="action_fdroid">F-Droid</string>
-    <string name="action_skip">跳過</string>
     <string name="command">命令</string>
     <string name="tag">標籤</string>
     <string name="home_font_size">首頁字型大小</string>

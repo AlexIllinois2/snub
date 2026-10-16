@@ -116,7 +116,6 @@
     <string name="action_terminal">Terminale</string>
     <string name="mode_su_hide">Root - Nascondi</string>
     <string name="action_fdroid">F-Droid</string>
-    <string name="action_skip">Passa</string>
     <string name="command">Commando</string>
     <string name="tag">Etichetta</string>
     <string name="freeze_system_app">Gelare o disinstallare delle applicazioni sistema può causare un bootloop dell\'apparecchio. Assicurati di sapere ciò che fai e copia i tuoi dati prima o utilizza delle applicazioni di recupero che sopportano l\'accesso ai file.</string>

@@ -1,11 +1,8 @@
 package io.github.AlexIllinois2.snub.ui.main
 
 import android.Manifest
-import android.app.AppOpsManager
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.provider.Settings
 import android.view.Menu
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -32,7 +29,6 @@ import io.github.AlexIllinois2.snub.databinding.ActivityMainBinding
 import io.github.AlexIllinois2.snub.extensions.*
 import io.github.AlexIllinois2.snub.ui.apps.AppsFragment
 import io.github.AlexIllinois2.snub.utils.HShell
-import io.github.AlexIllinois2.snub.utils.HSystem
 import io.github.AlexIllinois2.snub.utils.HTarget
 import io.github.AlexIllinois2.snub.utils.HUI
 import com.google.android.material.appbar.AppBarLayout
@@ -47,7 +43,7 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
     private lateinit var binding: ActivityMainBinding
 
     private val requestPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestPermission()) { requestRootAndUsageAccess() }
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { requestRootPermission() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -130,29 +126,18 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
         AppsFragment.cameToForeground = true
     }
 
-    /** Requests the notification permission first, then checks root and usage access. */
+    /** Requests the notification permission first, then checks root. */
     private fun requestNeededPermissions() {
         if (HTarget.T && ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
             != PackageManager.PERMISSION_GRANTED
         ) requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-        else requestRootAndUsageAccess()
+        else requestRootPermission()
     }
 
-    private fun requestRootAndUsageAccess() {
+    private fun requestRootPermission() {
         lifecycleScope.launch {
             // Fires the su grant dialog once; runs off the main thread as su may block.
-            val rootGranted = withContext(Dispatchers.IO) { HShell.checkSU }
-            if (!rootGranted) HUI.showToast(R.string.permission_denied)
-            if (!HSystem.checkOpUsageStats(this@MainActivity)) {
-                // Usage access is an AppOps permission that cannot be requested via a dialog;
-                // self-grant it with root, falling back to the settings page on failure.
-                if (rootGranted) withContext(Dispatchers.IO) {
-                    HShell.setAppOpAllowed(packageName, AppOpsManager.OPSTR_GET_USAGE_STATS)
-                }
-                if (!HSystem.checkOpUsageStats(this@MainActivity)) startActivity(
-                    Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                )
-            }
+            if (!withContext(Dispatchers.IO) { HShell.checkSU }) HUI.showToast(R.string.permission_denied)
         }
     }
 
