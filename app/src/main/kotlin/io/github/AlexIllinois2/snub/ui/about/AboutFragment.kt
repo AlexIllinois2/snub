@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -34,8 +33,6 @@ import io.github.AlexIllinois2.snub.ui.main.MainFragment
 import io.github.AlexIllinois2.snub.ui.theme.AppTheme
 import io.github.AlexIllinois2.snub.utils.HPackages
 import io.github.AlexIllinois2.snub.utils.HUI
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.imageview.ShapeableImageView
 import java.text.SimpleDateFormat
 
 class AboutFragment : MainFragment() {
@@ -76,7 +73,7 @@ class AboutFragment : MainFragment() {
                         painter = painterResource(R.drawable.ic_launcher_foreground),
                         contentDescription = null,
                         modifier = Modifier.size(72.dp).background(Color.White, CircleShape),
-                        contentScale = ContentScale.None
+                        contentScale = ContentScale.Fit
                     )
                     Text(
                         text = stringResource(R.string.app_name), style = MaterialTheme.typography.bodyLarge
@@ -100,26 +97,8 @@ class AboutFragment : MainFragment() {
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_medium)))
             OutlinedCard(modifier = Modifier.padding(horizontal = dimensionResource(R.dimen.padding_medium))) {
                 ClickableItem(
-                    icon = Icons.AutoMirrored.Filled.Send, title = R.string.action_telegram
-                ) { HUI.openLink(HailData.URL_TELEGRAM) }
-                ClickableItem(
-                    icon = Icons.Outlined.Group, title = R.string.action_qq
-                ) { HUI.openLink(HailData.URL_QQ) }
-                ClickableItem(
-                    icon = Icons.Outlined.LocalMall, title = R.string.action_fdroid
-                ) { HUI.openLink(HailData.URL_FDROID) }
-                ClickableItem(
-                    icon = Icons.Outlined.Coffee, title = R.string.action_donate, onClick = ::openDonateDialog
-                )
-            }
-            Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_medium)))
-            OutlinedCard(modifier = Modifier.padding(horizontal = dimensionResource(R.dimen.padding_medium))) {
-                ClickableItem(
                     icon = Icons.Outlined.Code, title = R.string.action_github
                 ) { HUI.openLink(HailData.URL_GITHUB) }
-                ClickableItem(
-                    icon = Icons.Outlined.Translate, title = R.string.action_translate
-                ) { HUI.openLink(HailData.URL_TRANSLATE) }
                 ClickableItem(
                     icon = Icons.Outlined.Description, title = R.string.action_licenses
                 ) { openLicenseDialog = true }
@@ -172,32 +151,4 @@ class AboutFragment : MainFragment() {
         },
         onDismissRequest = onDismiss,
         confirmButton = { TextButton(onClick = onDismiss) { Text(text = stringResource(android.R.string.ok)) } })
-
-    private fun openDonateDialog() {
-        MaterialAlertDialogBuilder(activity).setTitle(R.string.title_donate)
-            .setSingleChoiceItems(R.array.donate_payment_entries, 0) { dialog, which ->
-                dialog.dismiss()
-                when (which) {
-                    0 -> if (HUI.openLink(HailData.URL_ALIPAY_API).not()) {
-                        HUI.openLink(HailData.URL_ALIPAY)
-                    }
-
-                    1 -> MaterialAlertDialogBuilder(activity).setTitle(R.string.title_donate)
-                        .setView(ShapeableImageView(activity).apply {
-                            val padding = resources.getDimensionPixelOffset(R.dimen.padding_large)
-                            setPadding(0, padding, 0, padding)
-                            setImageResource(R.mipmap.qr_wechat)
-                        }).setPositiveButton(R.string.donate_wechat_scan) { _, _ ->
-                            app.packageManager.getLaunchIntentForPackage("com.tencent.mm")?.let {
-                                it.putExtra("LauncherUI.From.Scaner.Shortcut", true)
-                                startActivity(it)
-                            } ?: HUI.showToast(R.string.app_not_installed)
-                        }.setNegativeButton(android.R.string.cancel, null).show()
-
-                    2 -> HUI.openLink(HailData.URL_KOFI)
-                    3 -> HUI.openLink(HailData.URL_LIBERAPAY)
-                    4 -> HUI.openLink(HailData.URL_PAYPAL)
-                }
-            }.setNegativeButton(android.R.string.cancel, null).show()
-    }
 }

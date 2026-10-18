@@ -14,12 +14,16 @@ import io.github.AlexIllinois2.snub.app.HailData
 import io.github.AlexIllinois2.snub.services.AutoFreezeService
 import io.github.AlexIllinois2.snub.services.LowBatteryShutdownService
 import io.github.AlexIllinois2.snub.services.SwipeFreezeService
+import io.github.AlexIllinois2.snub.utils.HCrash
 import io.github.AlexIllinois2.snub.utils.HTarget
 
 class HailApp : Application() {
     override fun onCreate() {
         super.onCreate()
         app = this
+        // Record uncaught exceptions to a local file; the log is offered for
+        // local saving on the next launch, never turned into a link.
+        HCrash.install()
         // DirtyDataUpdater.update(app)
         if (!HTarget.S) setAppTheme(HailData.appTheme)
         // Package update force-stops the app and cancels START_STICKY restarts,

@@ -1,6 +1,8 @@
 package io.github.AlexIllinois2.snub.ui.main
 
 import android.Manifest
+import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.Menu
@@ -28,14 +30,20 @@ import io.github.AlexIllinois2.snub.app.HailData
 import io.github.AlexIllinois2.snub.databinding.ActivityMainBinding
 import io.github.AlexIllinois2.snub.extensions.*
 import io.github.AlexIllinois2.snub.ui.apps.AppsFragment
+import io.github.AlexIllinois2.snub.utils.HCrash
 import io.github.AlexIllinois2.snub.utils.HShell
 import io.github.AlexIllinois2.snub.utils.HTarget
 import io.github.AlexIllinois2.snub.utils.HUI
 import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedListener {
     lateinit var fab: ExtendedFloatingActionButton
@@ -44,6 +52,25 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { requestRootPermission() }
+
+    /** Lets the user pick where to write the recorded crash log; nothing is ever uploaded. */
+    private val saveCrashLogLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
+            val uri = result.data?.data ?: return@registerForActivityResult
+            val content = pendingCrashLogContent ?: return@registerForActivityResult
+            val saved = runCatching {
+                contentResolver.openOutputStream(uri)?.use { it.write(content.toByteArray()) }
+                true
+            }.getOrDefault(false)
+            if (saved) {
+                HCrash.clear()
+                HUI.showToast(R.string.msg_crash_saved)
+            } else HUI.showToast(R.string.msg_crash_save_failed)
+        }
+
+    private var pendingCrashLogs: List<File> = emptyList()
+    private var pendingCrashLogContent: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,6 +90,9 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
             permissionsRequested = true
             requestNeededPermissions()
         }
+        // Offer any crash log recorded by a previous process for local saving.
+        val crashLogs = HCrash.pendingLogs()
+        if (crashLogs.isNotEmpty()) showCrashLogDialog(crashLogs)
         if (!HailData.biometricLogin || BiometricManager.from(this)
                 .canAuthenticate(BIOMETRIC_STRONG or DEVICE_CREDENTIAL) != BiometricManager.BIOMETRIC_SUCCESS
         ) return
@@ -139,6 +169,32 @@ class MainActivity : AppCompatActivity(), NavController.OnDestinationChangedList
             // Fires the su grant dialog once; runs off the main thread as su may block.
             if (!withContext(Dispatchers.IO) { HShell.checkSU }) HUI.showToast(R.string.permission_denied)
         }
+    }
+
+    /**
+     * Asks whether to save the recorded crash log to a user-chosen local file.
+     * Declining keeps the log on disk but never offers it again.
+     */
+    private fun showCrashLogDialog(logs: List<File>) {
+        pendingCrashLogs = logs
+        // Read the content up front: the files get renamed once the dialog is dismissed.
+        pendingCrashLogContent = logs.joinToString("\n\n--------\n\n") { runCatching { it.readText() }.getOrDefault("") }
+        val time = SimpleDateFormat.getDateTimeInstance().format(Date(logs.first().lastModified()))
+        MaterialAlertDialogBuilder(this).setTitle(R.string.title_crash_log)
+            .setMessage(getString(R.string.msg_crash_save, time))
+            .setPositiveButton(R.string.action_save) { _, _ ->
+                saveCrashLogLauncher.launch(
+                    Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                        addCategory(Intent.CATEGORY_OPENABLE)
+                        type = "text/plain"
+                        putExtra(
+                            Intent.EXTRA_TITLE,
+                            "snub-crash-" + SimpleDateFormat("yyyyMMdd-HHmmss", Locale.US).format(Date()) + ".log"
+                        )
+                    }
+                )
+            }.setNegativeButton(android.R.string.cancel, null)
+            .setOnDismissListener { logs.forEach { HCrash.markOffered(it) } }.show()
     }
 
     /* override fun onStop() {

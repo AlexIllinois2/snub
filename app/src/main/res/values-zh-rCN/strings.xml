@@ -16,6 +16,11 @@
     <string name="action_github">GitHub</string>
     <string name="action_translate">翻译</string>
     <string name="action_licenses">许可证</string>
+    <string name="title_crash_log">崩溃日志</string>
+    <string name="msg_crash_save">检测到 %1$s 的崩溃日志，是否保存到本地？</string>
+    <string name="action_save">保存</string>
+    <string name="msg_crash_saved">崩溃日志已保存</string>
+    <string name="msg_crash_save_failed">崩溃日志保存失败</string>
     <string name="action_freeze_all">全部冻结</string>
     <string name="action_unfreeze_all">全部解冻</string>
     <string name="action_freeze_current">冻结可见</string>

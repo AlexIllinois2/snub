@@ -1,7 +1,6 @@
 package io.github.AlexIllinois2.snub.ui.settings
 
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.os.Bundle
 import android.provider.Settings
 import android.view.*
@@ -101,25 +100,6 @@ class SettingsFragment : MainFragment(), MenuProvider {
                 entriesId = R.array.app_theme_entries,
                 titleId = R.string.app_theme,
                 icon = Icons.Outlined.DarkMode
-            )
-            listPreference(
-                key = HailData.ICON_PACK,
-                defaultValue = HailData.ACTION_NONE,
-                onValueChange = { _, _ ->
-                    AppIconCache.clear()
-                    true
-                },
-                values = mutableListOf(HailData.ACTION_NONE).apply {
-                    addAll(Intent(Intent.ACTION_MAIN).addCategory("com.anddoes.launcher.THEME").let {
-                        if (HTarget.T) app.packageManager.queryIntentActivities(
-                            it, PackageManager.ResolveInfoFlags.of(0)
-                        ) else app.packageManager.queryIntentActivities(it, 0)
-                    }.map { it.activityInfo.packageName })
-                },
-                titleId = R.string.icon_pack,
-                icon = Icons.Outlined.Palette,
-                summary = { iconPackName(it) },
-                valueToText = ::iconPackName
             )
             switchPreference(
                 key = HailData.GRAYSCALE_ICON,
@@ -378,9 +358,6 @@ class SettingsFragment : MainFragment(), MenuProvider {
         HShortcuts.removeAllDynamicShortcuts()
         HShortcuts.addDynamicShortcutAction(HailData.dynamicShortcutAction)
     }
-
-    private fun iconPackName(pack: String): String = if (pack == HailData.ACTION_NONE) getString(R.string.action_none)
-    else HPackages.getApplicationInfoOrNull(pack)?.loadLabel(app.packageManager)?.toString() ?: pack
 
     private fun addPinShortcut() {
         MaterialAlertDialogBuilder(requireActivity()).setTitle(R.string.action_add_pin_shortcut)
