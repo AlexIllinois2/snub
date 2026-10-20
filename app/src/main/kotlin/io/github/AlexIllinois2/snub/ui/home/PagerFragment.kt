@@ -72,8 +72,8 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
         }
         get() = (parentFragment as HomeFragment).multiselect
     private val selectedList get() = (parentFragment as HomeFragment).selectedList
-    private val tabs: TabLayout? get() = (parentFragment as? HomeFragment)?.binding?.tabs
-    private val adapter: HomeAdapter? get() = (parentFragment as? HomeFragment)?.binding?.pager?.adapter as? HomeAdapter
+    private val tabs: TabLayout? get() = (parentFragment as? HomeFragment)?.bindingOrNull?.tabs
+    private val adapter: HomeAdapter? get() = (parentFragment as? HomeFragment)?.bindingOrNull?.pager?.adapter as? HomeAdapter
     private val tag: Tag? get() = tabs?.let { HailData.displayTags.getOrNull(it.selectedTabPosition) }
     private val frozenTab: Boolean get() = tag?.id == HailData.FROZEN_TAB_ID
 
@@ -99,7 +99,9 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
                     super.onScrollStateChanged(recyclerView, newState)
                     when (newState) {
                         RecyclerView.SCROLL_STATE_IDLE -> activity.fab.run {
-                            postDelayed({ if (!frozenTab) show() }, 1000)
+                            // The FAB outlives this view: the post may fire after
+                            // onDestroyView, so check the binding before showing.
+                            postDelayed({ if (_binding != null && !frozenTab) show() }, 1000)
                         }
 
                         RecyclerView.SCROLL_STATE_DRAGGING -> activity.fab.hide()

@@ -19,6 +19,11 @@ class HomeFragment : MainFragment() {
     val selectedList: MutableList<AppInfo> = mutableListOf()
     private var _binding: FragmentHomeBinding? = null
     val binding get() = _binding!!
+    /**
+     * Nullable accessor for callbacks that may outlive the view (delayed posts,
+     * coroutines): [binding] would throw once the view is destroyed.
+     */
+    val bindingOrNull: FragmentHomeBinding? get() = _binding
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
