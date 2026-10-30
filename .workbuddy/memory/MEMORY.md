@@ -7,6 +7,11 @@
 - 系统无 JAVA_HOME/ANDROID_HOME，无 Android Studio；Gradle 首次运行会自动下载发行版
 - Git Bash 调用 adb 时 `/sdcard/...` 路径会被 MSYS 转换，需写成 `//sdcard/...`
 
+## 构建环境（Linux 沙箱，/home/v/.local/project/snub）
+- JDK 21：`/home/v/.gradle/custom-jdks/jdk-21.0.12.1+1`（系统默认 Java 17 不满足 toolchain，必须显式设 JAVA_HOME）
+- Android SDK：`/home/v/Android/Sdk`；`local.properties` 的 `sdk.dir` 指向它（git 忽略）
+- 编译验证命令：`JAVA_HOME=/home/v/.gradle/custom-jdks/jdk-21.0.12.1+1 ./gradlew :app:compileDebugKotlin -q`
+
 ## 签名
 - 本机无 `signing.properties`（仅有 .sample），release 按项目脚本回退 debug 签名（CN=Android Debug）；如需正式签名需用户提供 keystore 并写入 signing.properties
 

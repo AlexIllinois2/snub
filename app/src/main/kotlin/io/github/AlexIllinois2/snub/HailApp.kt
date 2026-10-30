@@ -5,6 +5,7 @@ import android.app.Application
 import android.app.UiModeManager
 import android.content.ComponentName
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatDelegate
@@ -12,12 +13,14 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import io.github.AlexIllinois2.snub.app.AppManager
 import io.github.AlexIllinois2.snub.app.HailData
+import io.github.AlexIllinois2.snub.receiver.ManageNewAppsReceiver
 import io.github.AlexIllinois2.snub.services.AutoFreezeService
 import io.github.AlexIllinois2.snub.services.LowBatteryShutdownService
 import io.github.AlexIllinois2.snub.services.SwipeFreezeService
 import io.github.AlexIllinois2.snub.utils.HCrash
 import io.github.AlexIllinois2.snub.utils.HLog
 import io.github.AlexIllinois2.snub.utils.HTarget
+import io.github.AlexIllinois2.snub.work.HWork
 
 class HailApp : Application() {
 
@@ -26,6 +29,7 @@ class HailApp : Application() {
      * retried as soon as the app enters the foreground, where starting is allowed again.
      */
     private val pendingFgsStarts = mutableListOf<Intent>()
+    private var manageNewAppsReceiver: ManageNewAppsReceiver? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -55,6 +59,32 @@ class HailApp : Application() {
         }
         if (HailData.lowBatteryShutdown) {
             setLowBatteryShutdownService(true)
+        }
+        if (HailData.autoManageNewApps) {
+            setManageNewApps(true)
+        }
+    }
+
+    /**
+     * While enabled, newly installed user apps are added to management automatically:
+     * a runtime receiver covers installs while the process is alive, and a scan
+     * (also run here) covers the installs missed while the process was dead.
+     */
+    fun setManageNewApps(enabled: Boolean = HailData.autoManageNewApps) {
+        if (enabled) {
+            if (manageNewAppsReceiver == null) {
+                manageNewAppsReceiver = ManageNewAppsReceiver().also {
+                    ContextCompat.registerReceiver(
+                        this, it,
+                        IntentFilter(Intent.ACTION_PACKAGE_ADDED).apply { addDataScheme("package") },
+                        ContextCompat.RECEIVER_NOT_EXPORTED // Protected system broadcast
+                    )
+                }
+            }
+            HWork.manageNewApps()
+        } else {
+            manageNewAppsReceiver?.let { runCatching { unregisterReceiver(it) } }
+            manageNewAppsReceiver = null
         }
     }
 

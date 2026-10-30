@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.AddToHomeScreen
 import androidx.compose.material.icons.automirrored.outlined.ManageSearch
 import androidx.compose.material.icons.automirrored.outlined.Shortcut
 import androidx.compose.material.icons.outlined.*
@@ -66,6 +67,7 @@ class SettingsFragment : MainFragment(), MenuProvider {
     private fun SettingsScreen() {
         val swipeFreezeEnabled = rememberPreferenceState(HailData.SWIPE_FREEZE_ENABLED, false)
         val lowBatteryShutdown = rememberPreferenceState(HailData.LOW_BATTERY_SHUTDOWN, false)
+        val autoManageNewApps = rememberPreferenceState(HailData.AUTO_MANAGE_NEW_APPS, false)
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             listPreference(
                 key = HailData.WORKING_MODE,
@@ -244,6 +246,25 @@ class SettingsFragment : MainFragment(), MenuProvider {
                 enabled = { lowBatteryShutdown.value },
                 icon = { Icon(imageVector = Icons.Outlined.Timer, contentDescription = null) },
                 valueText = { Text(text = "%.0f s".format(it)) },
+            )
+            horizontalDivider()
+            preferenceCategory(key = "new_apps", title = { Text(text = stringResource(R.string.auto_manage_new_apps)) })
+            switchPreference(
+                rememberState = { autoManageNewApps },
+                onValueChange = { _, value ->
+                    if (value) HailData.autoManageSince = System.currentTimeMillis()
+                    app.setManageNewApps(value)
+                    true
+                },
+                titleId = R.string.auto_manage_new_apps,
+                icon = Icons.Outlined.NewReleases
+            )
+            switchPreference(
+                key = HailData.AUTO_SHORTCUT_NEW_APPS,
+                defaultValue = false,
+                titleId = R.string.auto_shortcut_new_apps,
+                enabled = autoManageNewApps.value,
+                icon = Icons.AutoMirrored.Outlined.AddToHomeScreen
             )
             horizontalDivider()
             preferenceCategory(key = "shortcuts", title = { Text(text = stringResource(R.string.title_shortcuts)) })

@@ -3,6 +3,7 @@ package io.github.AlexIllinois2.snub.utils
 import android.app.ActivityManager
 import android.app.AppOpsManager
 import android.content.pm.ApplicationInfo
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.annotation.RequiresApi
@@ -25,6 +26,12 @@ object HPackages {
             PackageManager.ApplicationInfoFlags.of(flags.toLong())
         )
         else app.packageManager.getInstalledApplications(flags)
+
+    fun getInstalledPackages(flags: Int = if (HTarget.N) PackageManager.MATCH_UNINSTALLED_PACKAGES else 8192): List<PackageInfo> =
+        if (HTarget.T) app.packageManager.getInstalledPackages(
+            PackageManager.PackageInfoFlags.of(flags.toLong())
+        )
+        else app.packageManager.getInstalledPackages(flags)
 
     fun getUnhiddenPackageInfoOrNull(
         packageName: String, flags: Int = if (HTarget.N) PackageManager.MATCH_UNINSTALLED_PACKAGES else 8192

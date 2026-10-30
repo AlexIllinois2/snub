@@ -102,6 +102,8 @@
     <string name="action_unfreeze_remove_home">解凍並從首頁中移除</string>
     <string name="action_freeze_non_whitelisted">凍結非白名單</string>
     <string name="title_shortcuts">捷徑</string>
+    <string name="auto_manage_new_apps">新裝 App 自動管理</string>
+    <string name="auto_shortcut_new_apps">自動新增至主畫面</string>
     <string name="dynamic_shortcut_action">動態捷徑動作</string>
     <string name="action_none">無</string>
     <string name="action_freeze_tag">標籤凍結</string>

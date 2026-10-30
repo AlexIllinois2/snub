@@ -6,6 +6,7 @@ import io.github.AlexIllinois2.snub.BuildConfig
 import io.github.AlexIllinois2.snub.HailApp.Companion.app
 import io.github.AlexIllinois2.snub.R
 import io.github.AlexIllinois2.snub.utils.HFiles
+import io.github.AlexIllinois2.snub.utils.HShortcuts
 import io.github.AlexIllinois2.snub.utils.TempUnfrozenList
 import org.json.JSONArray
 import org.json.JSONObject
@@ -106,6 +107,9 @@ object HailData {
     const val SKIP_WHILE_CHARGING = "skip_while_charging"
     const val SKIP_FOREGROUND_APP = "skip_foreground_app"
     const val SKIP_NOTIFYING_APP = "skip_notifying_app"
+    const val AUTO_MANAGE_NEW_APPS = "auto_manage_new_apps"
+    private const val AUTO_MANAGE_SINCE = "auto_manage_since"
+    const val AUTO_SHORTCUT_NEW_APPS = "auto_shortcut_new_apps"
     const val SWIPE_FREEZE_ENABLED = "swipe_freeze_enabled"
     const val SWIPE_FREEZE_INTERVAL = "swipe_freeze_interval_f"
     const val SWIPE_FREEZE_DELAY = "swipe_freeze_delay_f"
@@ -158,6 +162,13 @@ object HailData {
     val lowBatteryLevel get() = sp.getFloat(LOW_BATTERY_LEVEL, 5f).toInt()
     val lowBatteryNotifySeconds get() = sp.getFloat(LOW_BATTERY_NOTIFY_SECONDS, 30f).toLong()
     val dynamicShortcutAction get() = sp.getString(DYNAMIC_SHORTCUT_ACTION, ACTION_NONE)!!
+    val autoManageNewApps get() = sp.getBoolean(AUTO_MANAGE_NEW_APPS, false)
+
+    /** Only apps installed after this moment are auto-managed. */
+    var autoManageSince: Long
+        get() = sp.getLong(AUTO_MANAGE_SINCE, 0L)
+        set(value) = sp.edit { putLong(AUTO_MANAGE_SINCE, value) }
+    val autoShortcutNewApps get() = sp.getBoolean(AUTO_SHORTCUT_NEW_APPS, false)
 
     private val dir = "${app.filesDir.path}/v1"
     private val appsPath = "$dir/apps.json"
@@ -191,6 +202,7 @@ object HailData {
     fun addCheckedApp(packageName: String, tagId: Int = 0, saveApps: Boolean = true) {
         checkedList.add(AppInfo(packageName, tagId = tagId))
         if (saveApps) saveApps()
+        HShortcuts.autoCreateSilentShortcut(packageName)
     }
 
     fun removeCheckedApp(packageName: String, saveApps: Boolean = true) {

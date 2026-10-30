@@ -464,6 +464,40 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
         delay(settleMillis) // Gap before the next dialog
     }
 
+    /**
+     * Adds home screen shortcuts for managed frozen apps that don't have one, offering
+     * interactive (per-app launcher confirmation dialogs) and silent creation.
+     * Apps without a pinned shortcut are detected on each run; silent shortcuts already
+     * on the home screen are deduplicated by the launcher via the "duplicate" extra.
+     * When some silent broadcasts are not delivered, the user is asked whether to
+     * interactively add the remaining apps instead.
+     */
+    private fun createSilentShortcuts() {
+        val apps = HailData.checkedList.filter {
+            it.packageName != BuildConfig.APPLICATION_ID && it.applicationInfo != null
+                    && AppManager.isAppFrozen(it.packageName) && it.hasLauncherActivity()
+                    && !HShortcuts.hasPinnedShortcut(it.packageName)
+        }
+        if (apps.isEmpty()) HUI.showToast(R.string.msg_shortcuts_none)
+        else MaterialAlertDialogBuilder(activity).setTitle(R.string.action_add_shortcuts_silent)
+            .setMessage(getString(R.string.msg_add_silent_shortcuts, apps.size.toString()))
+            .setPositiveButton(R.string.action_add_shortcuts_interactively) { _, _ ->
+                requestShortcuts(apps)
+            }.setNeutralButton(R.string.action_add_shortcuts_silently) { _, _ ->
+                viewLifecycleOwner.lifecycleScope.launch {
+                    val undelivered = HShortcuts.createSilentShortcuts(apps)
+                    if (undelivered.isEmpty()) HUI.showToast(
+                        getString(R.string.msg_shortcuts_created, apps.size.toString())
+                    ) else MaterialAlertDialogBuilder(activity)
+                        .setTitle(R.string.action_add_shortcuts_silent)
+                        .setMessage(getString(R.string.msg_silent_shortcuts_failed, undelivered.size.toString()))
+                        .setPositiveButton(R.string.action_add_shortcuts_interactively) { _, _ ->
+                            requestShortcuts(undelivered)
+                        }.setNegativeButton(android.R.string.cancel, null).show()
+                }
+            }.setNegativeButton(android.R.string.cancel, null).show()
+    }
+
     private fun singleTagDialog() {
         val initialIndex =
             if (selectedList.all { it.tagId == selectedList.first().tagId }) HailData.tags.indexOfFirst { it.id == selectedList.first().tagId }
@@ -776,6 +810,7 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
 
             R.id.action_export_current -> exportToClipboard(pagerAdapter.currentList)
             R.id.action_export_all -> exportToClipboard(HailData.checkedList)
+            R.id.action_add_shortcuts_silent -> createSilentShortcuts()
         }
         return false
     }

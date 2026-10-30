@@ -10,6 +10,17 @@ import io.github.AlexIllinois2.snub.app.HailData
 import java.util.concurrent.TimeUnit
 
 object HWork {
+    private const val MANAGE_NEW_APPS = "manage_new_apps"
+
+    /** Scans for newly installed apps to manage in the background. */
+    fun manageNewApps() {
+        WorkManager.getInstance(app).enqueueUniqueWork(
+            MANAGE_NEW_APPS,
+            ExistingWorkPolicy.REPLACE,
+            OneTimeWorkRequestBuilder<ManageNewAppsWorker>().build()
+        )
+    }
+
     fun cancelWork(name: String) =
         WorkManager.getInstance(app).cancelUniqueWork(name)
 
