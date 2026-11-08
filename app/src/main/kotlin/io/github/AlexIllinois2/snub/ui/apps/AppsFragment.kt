@@ -89,7 +89,12 @@ class AppsFragment : MainFragment(), AppsAdapter.OnItemClickListener, AppsAdapte
             onItemCheckedChangeListener = this@AppsFragment
         }
         binding.refresh.apply {
-            setOnRefreshListener { updateAppList() }
+            setOnRefreshListener {
+                // Re-filter right away as well: when the package list itself did not change,
+                // the observer below would skip it and the checked-first grouping would stay stale.
+                updateAppList()
+                updateDisplayAppList()
+            }
             applyDefaultInsetter { marginRelative(isRtl, start = !isLandscape, end = true) }
         }
         binding.recyclerView.apply {
@@ -132,6 +137,9 @@ class AppsFragment : MainFragment(), AppsAdapter.OnItemClickListener, AppsAdapte
             cameToForeground = false
             updateAppList()
         }
+        // Re-apply the checked-first grouping when entering or returning to this page;
+        // checking/unchecking itself deliberately does not re-sort the list.
+        updateDisplayAppList()
     }
 
     override fun onItemClick(buttonView: CompoundButton) {
@@ -327,6 +335,12 @@ class AppsFragment : MainFragment(), AppsAdapter.OnItemClickListener, AppsAdapte
                 HailData.changeAppsFilter(filter, item.isChecked)
             }
         }
+        updateDisplayAppList()
+    }
+
+    /** Refreshes the list after the managed apps changed outside this page. */
+    fun refreshList() {
+        updateAppList()
         updateDisplayAppList()
     }
 

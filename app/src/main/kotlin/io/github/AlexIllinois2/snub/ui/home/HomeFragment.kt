@@ -43,4 +43,10 @@ class HomeFragment : MainFragment() {
         super.onDestroyView()
         _binding = null
     }
+
+    /** Refreshes the visible tag page after the managed list changed outside its own UI. */
+    fun refreshPagers() {
+        childFragmentManager.fragments.filterIsInstance<PagerFragment>().filter { it.isResumed }
+            .forEach { it.refresh() }
+    }
 }

@@ -26,10 +26,14 @@ class ManageNewAppsWorker(context: Context, params: WorkerParameters) : Worker(c
                     && info.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP == 0
                     && packageInfo.firstInstallTime > since
                     && !HailData.isChecked(packageInfo.packageName)
+                    && !HailData.isDeclinedNewApp(packageInfo.packageName, packageInfo.firstInstallTime)
         }.map { it.packageName }
         if (added.isEmpty()) return Result.success()
-        added.forEach { HailData.addCheckedApp(it) }
-        HailApp.app.setAutoFreezeService()
+        if (HailData.askNewApps) added.forEach { HailApp.app.promptManageNewApp(it) }
+        else {
+            added.forEach { HailData.addCheckedApp(it) }
+            HailApp.app.setAutoFreezeService()
+        }
         return Result.success()
     }
 }

@@ -1,6 +1,7 @@
 /.gradle/
 /.idea/
 /build/
+/dist/
 /local.properties
 /signing.properties
 *.iml

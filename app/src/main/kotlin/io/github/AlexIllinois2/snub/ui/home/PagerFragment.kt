@@ -151,6 +151,9 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
         }
     }
 
+    /** Rebuilds the visible list, e.g. after the managed list changed elsewhere. */
+    fun refresh() = updateCurrentList()
+
     private fun updateCurrentList() = (if (frozenTab) frozenList() else HailData.checkedList.filter {
         if (query.isEmpty()) it.tagId == tag?.id
         else ((HailData.nineKeySearch && NineKeySearch.search(

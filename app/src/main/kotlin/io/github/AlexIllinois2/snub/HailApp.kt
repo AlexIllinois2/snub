@@ -8,6 +8,8 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
@@ -19,6 +21,7 @@ import io.github.AlexIllinois2.snub.services.LowBatteryShutdownService
 import io.github.AlexIllinois2.snub.services.SwipeFreezeService
 import io.github.AlexIllinois2.snub.utils.HCrash
 import io.github.AlexIllinois2.snub.utils.HLog
+import io.github.AlexIllinois2.snub.utils.HNewAppsNotification
 import io.github.AlexIllinois2.snub.utils.HTarget
 import io.github.AlexIllinois2.snub.work.HWork
 
@@ -30,6 +33,14 @@ class HailApp : Application() {
      */
     private val pendingFgsStarts = mutableListOf<Intent>()
     private var manageNewAppsReceiver: ManageNewAppsReceiver? = null
+    private val mainHandler = Handler(Looper.getMainLooper())
+
+    /**
+     * Set while an activity can show dialogs; null otherwise. A newly installed app
+     * cannot launch its prompt by itself: Android blocks activities started from a
+     * background receiver, so the prompt waits for the app to come to the foreground.
+     */
+    var newAppPromptHost: (() -> Unit)? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -86,6 +97,25 @@ class HailApp : Application() {
             manageNewAppsReceiver?.let { runCatching { unregisterReceiver(it) } }
             manageNewAppsReceiver = null
         }
+    }
+
+    /**
+     * Queues a newly installed app until the user confirms managing it, and lets the
+     * visible activity ask right away. Without a visible activity the app is queued and
+     * a notification reminds the user; the prompt is shown on the next foreground entry.
+     */
+    fun promptManageNewApp(packageName: String) {
+        HailData.addPendingNewApp(packageName)
+        mainHandler.post {
+            val host = newAppPromptHost
+            if (host != null) host() else HNewAppsNotification.show(this)
+        }
+    }
+
+    /** Drops the queued new apps and their reminder notification. */
+    fun clearPendingNewApps() {
+        HailData.clearPendingNewApps()
+        HNewAppsNotification.cancel(this)
     }
 
     fun setAutoFreezeService() {

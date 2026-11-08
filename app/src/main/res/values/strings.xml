@@ -139,6 +139,15 @@
     <string name="low_battery_channel_alert">Shutdown countdown</string>
     <string name="title_shortcuts">Shortcuts</string>
     <string name="auto_manage_new_apps">Auto manage newly installed apps</string>
+    <string name="ask_new_apps">Ask before managing</string>
+    <string name="new_app_installed">New app installed</string>
+    <string name="msg_manage_new_app">%1$s (%2$s)\n\nAdd this app to management?</string>
+    <string name="action_manage">Manage</string>
+    <string name="new_apps_channel">Newly installed apps</string>
+    <plurals name="pending_new_apps">
+        <item quantity="one">%1$d new app waiting for confirmation</item>
+        <item quantity="other">%1$d new apps waiting for confirmation</item>
+    </plurals>
     <string name="auto_shortcut_new_apps">Add to Home screen automatically</string>
     <string name="dynamic_shortcut_action">Dynamic shortcut action</string>
     <string name="action_none">None</string>

@@ -68,6 +68,7 @@ class SettingsFragment : MainFragment(), MenuProvider {
         val swipeFreezeEnabled = rememberPreferenceState(HailData.SWIPE_FREEZE_ENABLED, false)
         val lowBatteryShutdown = rememberPreferenceState(HailData.LOW_BATTERY_SHUTDOWN, false)
         val autoManageNewApps = rememberPreferenceState(HailData.AUTO_MANAGE_NEW_APPS, false)
+        val askNewApps = rememberPreferenceState(HailData.ASK_NEW_APPS, true)
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             listPreference(
                 key = HailData.WORKING_MODE,
@@ -253,11 +254,22 @@ class SettingsFragment : MainFragment(), MenuProvider {
                 rememberState = { autoManageNewApps },
                 onValueChange = { _, value ->
                     if (value) HailData.autoManageSince = System.currentTimeMillis()
+                    else app.clearPendingNewApps()
                     app.setManageNewApps(value)
                     true
                 },
                 titleId = R.string.auto_manage_new_apps,
                 icon = Icons.Outlined.NewReleases
+            )
+            switchPreference(
+                rememberState = { askNewApps },
+                onValueChange = { _, value ->
+                    if (!value) app.clearPendingNewApps()
+                    true
+                },
+                titleId = R.string.ask_new_apps,
+                enabled = autoManageNewApps.value,
+                icon = Icons.Outlined.HelpOutline
             )
             switchPreference(
                 key = HailData.AUTO_SHORTCUT_NEW_APPS,

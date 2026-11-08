@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import io.github.AlexIllinois2.snub.BuildConfig
+import io.github.AlexIllinois2.snub.HailApp
 import io.github.AlexIllinois2.snub.app.HailData
 
 /**
@@ -17,6 +18,8 @@ class ManageNewAppsReceiver : BroadcastReceiver() {
         if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) return // Update, not a fresh install
         val packageName = intent.data?.schemeSpecificPart ?: return
         if (packageName == BuildConfig.APPLICATION_ID || HailData.isChecked(packageName)) return
-        HailData.addCheckedApp(packageName)
+        if (HailData.isDeclinedNewApp(packageName)) return
+        if (HailData.askNewApps) HailApp.app.promptManageNewApp(packageName)
+        else HailData.addCheckedApp(packageName)
     }
 }

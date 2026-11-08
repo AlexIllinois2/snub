@@ -103,6 +103,14 @@
     <string name="action_freeze_non_whitelisted">凍結非白名單</string>
     <string name="title_shortcuts">捷徑</string>
     <string name="auto_manage_new_apps">新裝 App 自動管理</string>
+    <string name="ask_new_apps">管理前詢問</string>
+    <string name="new_app_installed">發現新安裝的應用程式</string>
+    <string name="msg_manage_new_app">%1$s（%2$s）\n\n是否將此應用程式加入管理？</string>
+    <string name="action_manage">管理</string>
+    <string name="new_apps_channel">新裝應用程式提醒</string>
+    <plurals name="pending_new_apps">
+        <item quantity="other">%1$d 個新裝應用程式待確認</item>
+    </plurals>
     <string name="auto_shortcut_new_apps">自動新增至主畫面</string>
     <string name="dynamic_shortcut_action">動態捷徑動作</string>
     <string name="action_none">無</string>

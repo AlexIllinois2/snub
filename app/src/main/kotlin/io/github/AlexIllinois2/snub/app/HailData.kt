@@ -6,6 +6,7 @@ import io.github.AlexIllinois2.snub.BuildConfig
 import io.github.AlexIllinois2.snub.HailApp.Companion.app
 import io.github.AlexIllinois2.snub.R
 import io.github.AlexIllinois2.snub.utils.HFiles
+import io.github.AlexIllinois2.snub.utils.HPackages
 import io.github.AlexIllinois2.snub.utils.HShortcuts
 import io.github.AlexIllinois2.snub.utils.TempUnfrozenList
 import org.json.JSONArray
@@ -108,7 +109,10 @@ object HailData {
     const val SKIP_FOREGROUND_APP = "skip_foreground_app"
     const val SKIP_NOTIFYING_APP = "skip_notifying_app"
     const val AUTO_MANAGE_NEW_APPS = "auto_manage_new_apps"
+    const val ASK_NEW_APPS = "ask_new_apps"
     private const val AUTO_MANAGE_SINCE = "auto_manage_since"
+    private const val PENDING_NEW_APPS = "pending_new_apps"
+    private const val DECLINED_NEW_APPS = "declined_new_apps"
     const val AUTO_SHORTCUT_NEW_APPS = "auto_shortcut_new_apps"
     const val SWIPE_FREEZE_ENABLED = "swipe_freeze_enabled"
     const val SWIPE_FREEZE_INTERVAL = "swipe_freeze_interval_f"
@@ -163,6 +167,56 @@ object HailData {
     val lowBatteryNotifySeconds get() = sp.getFloat(LOW_BATTERY_NOTIFY_SECONDS, 30f).toLong()
     val dynamicShortcutAction get() = sp.getString(DYNAMIC_SHORTCUT_ACTION, ACTION_NONE)!!
     val autoManageNewApps get() = sp.getBoolean(AUTO_MANAGE_NEW_APPS, false)
+
+    /** Ask before managing a newly installed app instead of managing it silently. */
+    val askNewApps get() = sp.getBoolean(ASK_NEW_APPS, true)
+
+    /** Newly installed apps waiting for the user to confirm managing them. */
+    val pendingNewApps: List<String>
+        get() = sp.getStringSet(PENDING_NEW_APPS, emptySet()).orEmpty().toList()
+
+    @Synchronized
+    fun addPendingNewApp(packageName: String) = sp.edit {
+        putStringSet(
+            PENDING_NEW_APPS,
+            sp.getStringSet(PENDING_NEW_APPS, emptySet()).orEmpty() + packageName
+        )
+    }
+
+    @Synchronized
+    fun removePendingNewApp(packageName: String) = sp.edit {
+        putStringSet(
+            PENDING_NEW_APPS,
+            sp.getStringSet(PENDING_NEW_APPS, emptySet()).orEmpty() - packageName
+        )
+    }
+
+    @Synchronized
+    fun clearPendingNewApps() = sp.edit { remove(PENDING_NEW_APPS) }
+
+    /**
+     * Whether the user declined to manage [packageName] for its current install.
+     * The install time is part of the record, so a reinstall asks again.
+     */
+    fun isDeclinedNewApp(packageName: String, firstInstallTime: Long): Boolean =
+        sp.getStringSet(DECLINED_NEW_APPS, emptySet()).orEmpty()
+            .contains("$packageName/$firstInstallTime")
+
+    fun isDeclinedNewApp(packageName: String): Boolean =
+        HPackages.getUnhiddenPackageInfoOrNull(packageName)
+            ?.let { isDeclinedNewApp(packageName, it.firstInstallTime) } ?: false
+
+    @Synchronized
+    fun declineNewApp(packageName: String) {
+        val info = HPackages.getUnhiddenPackageInfoOrNull(packageName) ?: return
+        val key = "$packageName/${info.firstInstallTime}"
+        sp.edit {
+            putStringSet(
+                DECLINED_NEW_APPS,
+                sp.getStringSet(DECLINED_NEW_APPS, emptySet()).orEmpty() + key
+            )
+        }
+    }
 
     /** Only apps installed after this moment are auto-managed. */
     var autoManageSince: Long

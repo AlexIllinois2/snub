@@ -135,6 +135,14 @@
     <string name="action_freeze_non_whitelisted">冻结非白名单</string>
     <string name="title_shortcuts">快捷方式</string>
     <string name="auto_manage_new_apps">新装 App 自动管理</string>
+    <string name="ask_new_apps">管理前询问</string>
+    <string name="new_app_installed">发现新装应用</string>
+    <string name="msg_manage_new_app">%1$s（%2$s）\n\n是否将此应用加入管理？</string>
+    <string name="action_manage">管理</string>
+    <string name="new_apps_channel">新装应用提醒</string>
+    <plurals name="pending_new_apps">
+        <item quantity="other">%1$d 个新装应用待确认</item>
+    </plurals>
     <string name="auto_shortcut_new_apps">自动添加到主屏幕</string>
     <string name="dynamic_shortcut_action">动态快捷方式行为</string>
     <string name="action_none">无</string>

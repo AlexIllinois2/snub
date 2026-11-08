@@ -39,6 +39,20 @@ freeze Android apps. [GitHub Releases](https://github.com/AlexIllinois2/snub/rel
   their silent behavior.
 - **Auto-refresh apps list**: the apps page automatically refreshes on the first entry after the app
   returns to the foreground, so newly installed apps show up without a manual refresh.
+- **Ask before managing new apps**: *Auto manage newly installed apps* has a new *Ask before managing*
+  sub-option (on by default). While it is on, a newly installed app is not managed silently: a dialog
+  showing its icon, name and package asks whether to manage it; only confirming adds it, cancelling
+  leaves it unmanaged. With the option off the previous silent behavior applies, and the option is
+  disabled while auto management itself is off. Installs detected while Snub is in the background are
+  queued — Android forbids launching activities from background receivers — and a single notification
+  (waiting count only, never app names) opens Snub to show the question; it is merged across installs,
+  and cleared once the queue is handled or the option is turned off. Without the notification permission
+  the notification is skipped and the question is still shown the next time the app comes to the foreground.
+- **Checked apps first**: on the apps page, checked (managed) apps are always grouped at the top of
+  the list and unchecked ones follow; both groups keep the selected sort order. The grouping is applied
+  when the apps page is opened or returned to, when pulling to refresh, and on the refresh after
+  returning to the foreground; checking or unchecking an app deliberately does not re-sort the list.
+  The Frozen tab and tag pages keep their original ordering.
 - **Low battery auto shutdown**: a foreground service (Root working mode only) monitors the battery level and
   shuts the device down once it drops to the configured threshold. A countdown notification with a cancel button
   is shown before shutdown, and plugging in the charger also cancels the pending shutdown. Threshold and countdown

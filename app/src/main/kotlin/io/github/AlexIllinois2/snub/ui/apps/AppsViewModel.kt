@@ -89,6 +89,9 @@ class AppsViewModel(application: Application) : AndroidViewModel(application) {
     ): List<ApplicationInfo> {
         val pm = getApplication<HailApp>().packageManager
         val selfPackageName = getApplication<HailApp>().packageName
+        // Snapshot once: a set lookup per item keeps the grouping sort cheap,
+        // and the list cannot change halfway through the filter.
+        val checkedPackages = HailData.checkedList.mapTo(HashSet()) { it.packageName }
         return withContext(Dispatchers.Default) {
             return@withContext appList.filter {
                 // Do not show the app itself, otherwise it could be frozen by mistake
@@ -118,6 +121,9 @@ class AppsViewModel(application: Application) : AndroidViewModel(application) {
 
                     else -> sortedWith(NameComparator)
                 }
+                // Stable grouping: checked (managed) apps first, unchecked ones after,
+                // each group keeping the sort order chosen above.
+                .sortedWith(compareByDescending { it.packageName in checkedPackages })
             }
         }
     }
