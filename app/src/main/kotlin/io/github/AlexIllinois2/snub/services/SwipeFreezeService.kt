@@ -15,6 +15,7 @@ import io.github.AlexIllinois2.snub.R
 import io.github.AlexIllinois2.snub.app.AppManager
 import io.github.AlexIllinois2.snub.app.HailData
 import io.github.AlexIllinois2.snub.ui.main.MainActivity
+import io.github.AlexIllinois2.snub.utils.HPackages
 import io.github.AlexIllinois2.snub.utils.HShell
 import io.github.AlexIllinois2.snub.utils.HTarget
 import io.github.AlexIllinois2.snub.utils.HUI
@@ -140,6 +141,7 @@ class SwipeFreezeService : Service() {
     private fun seedCheckedApps() {
         HailData.checkedList.filterNot {
             it.whitelisted || it.packageName == BuildConfig.APPLICATION_ID
+                || HPackages.isAppUninstalled(it.packageName)
         }.forEach {
             if (!AppManager.isAppFrozen(it.packageName)) TempUnfrozenList.add(it.packageName)
         }
@@ -147,6 +149,8 @@ class SwipeFreezeService : Service() {
 
     private fun freezeApp(packageName: String) {
         TempUnfrozenList.remove(packageName)
+        // An app removed after seeding would fail pm with "Unknown package"; skip its toast.
+        if (HPackages.isAppUninstalled(packageName)) return
         if (!AppManager.setAppFrozen(packageName, true)) {
             HUI.showToast(R.string.action_failed)
         }
