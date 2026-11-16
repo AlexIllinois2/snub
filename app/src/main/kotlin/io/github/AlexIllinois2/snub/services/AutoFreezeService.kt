@@ -14,6 +14,7 @@ import io.github.AlexIllinois2.snub.app.AppManager
 import io.github.AlexIllinois2.snub.app.HailApi
 import io.github.AlexIllinois2.snub.app.HailData
 import io.github.AlexIllinois2.snub.receiver.ScreenOffReceiver
+import io.github.AlexIllinois2.snub.utils.HPackages
 import io.github.AlexIllinois2.snub.utils.HSystem
 import io.github.AlexIllinois2.snub.utils.HUI
 import kotlinx.coroutines.CoroutineScope
@@ -29,6 +30,9 @@ class AutoFreezeService : NotificationListenerService() {
     private val lockReceiver by lazy { ScreenOffReceiver() }
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val lastForegroundTime = mutableMapOf<String, Long>()
+    // A frozen command can keep failing for the whole service lifetime (e.g. su unavailable).
+    // Without this guard the 10-second monitor loop would show the error over and over.
+    private var failureNotified = false
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         createNotificationChannel()
@@ -70,7 +74,7 @@ class AutoFreezeService : NotificationListenerService() {
                 if (appInfo.tagId !in bgTagIds) return@forEach
                 val pkg = appInfo.packageName
                 if (pkg == packageName || appInfo.whitelisted || appInfo.applicationInfo == null
-                    || AppManager.isAppFrozen(pkg) || charging || pkg in notifying
+                    || HPackages.isAppUninstalled(pkg) || AppManager.isAppFrozen(pkg) || charging || pkg in notifying
                 ) return@forEach
                 if (pkg == foregroundPkg) {
                     lastForegroundTime[pkg] = now
@@ -80,8 +84,9 @@ class AutoFreezeService : NotificationListenerService() {
                     // is treated as just now, so the delay always applies before freezing.
                     val since = lastForegroundTime[pkg] ?: now
                     if (now - since >= tag.autoFreezeBackgroundDelay * 1000) {
-                        if (!AppManager.setAppFrozen(pkg, true)) {
-                            HUI.showToast(R.string.permission_denied)
+                        if (!AppManager.setAppFrozen(pkg, true) && !failureNotified) {
+                            failureNotified = true
+                            HUI.showToast(R.string.action_failed)
                         }
                     }
                 }

@@ -148,7 +148,7 @@ class SwipeFreezeService : Service() {
     private fun freezeApp(packageName: String) {
         TempUnfrozenList.remove(packageName)
         if (!AppManager.setAppFrozen(packageName, true)) {
-            HUI.showToast(R.string.permission_denied)
+            HUI.showToast(R.string.action_failed)
         }
     }
 

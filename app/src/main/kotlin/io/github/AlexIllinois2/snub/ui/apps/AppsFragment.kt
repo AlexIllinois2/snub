@@ -308,7 +308,7 @@ class AppsFragment : MainFragment(), AppsAdapter.OnItemClickListener, AppsAdapte
             TempUnfrozenList.clear()
             appsAdapter.notifyDataSetChanged()
             app.setAutoFreezeService()  // stops the auto-freeze service: nothing is managed anymore
-            if (result.succeeded == 0 && result.failed > 0) HUI.showToast(R.string.permission_denied)
+            if (result.succeeded == 0 && result.failed > 0) HUI.showToast(R.string.action_failed)
             else HUI.showToast(
                 R.string.msg_unfreeze,
                 if (result.succeeded == 1) result.lastSucceeded else result.succeeded.toString()

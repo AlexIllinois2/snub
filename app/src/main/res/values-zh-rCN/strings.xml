@@ -76,6 +76,7 @@
     <string name="donate_liberapay">Liberapay</string>
     <string name="donate_paypal">PayPal</string>
     <string name="permission_denied">没有权限</string>
+    <string name="action_failed">操作失败</string>
     <string name="app_not_installed">应用未安装</string>
     <string name="activity_not_found">无可启动活动</string>
     <string name="operation_failed">操作失败：%s</string>

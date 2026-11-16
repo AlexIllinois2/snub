@@ -45,6 +45,10 @@ object AppManager {
 
     fun setAppFrozen(packageName: String, frozen: Boolean): Boolean {
         if (packageName == BuildConfig.APPLICATION_ID) return false
+        // MATCH_UNINSTALLED_PACKAGES leaves stale records behind for removed apps; running
+        // pm on them just fails with "Unknown package". Skip them instead of reporting a
+        // misleading permission error.
+        if (HPackages.isAppUninstalled(packageName)) return false
         val success = when (HailData.workingMode) {
             HailData.MODE_SU_STOP -> !frozen || HShell.forceStopApp(packageName)
             HailData.MODE_SU_DISABLE -> HShell.setAppDisabled(packageName, frozen)

@@ -201,7 +201,7 @@ class ApiActivity : ComponentActivity() {
         frozen && !HailData.isChecked(pkg) -> throw SecurityException("Package not checked")
         AppManager.isAppFrozen(pkg) != frozen && !AppManager.setAppFrozen(
             pkg, frozen
-        ) -> throw IllegalStateException(getString(R.string.permission_denied))
+        ) -> throw IllegalStateException(getString(R.string.action_failed))
 
         else -> {
             HUI.showToast(
@@ -218,7 +218,7 @@ class ApiActivity : ComponentActivity() {
         val filtered =
             list.filter { AppManager.isAppFrozen(it.packageName) != frozen && !(skipWhitelisted && it.whitelisted) }
         when (val result = AppManager.setListFrozen(frozen, *filtered.toTypedArray())) {
-            null -> throw IllegalStateException(getString(R.string.permission_denied))
+            null -> throw IllegalStateException(getString(R.string.action_failed))
             else -> {
                 HUI.showToast(
                     if (frozen) R.string.msg_freeze else R.string.msg_unfreeze, result
@@ -230,6 +230,6 @@ class ApiActivity : ComponentActivity() {
 
     private fun lockScreen(freezeAll: Boolean) {
         if (freezeAll) setListFrozen(true)
-        if (AppManager.lockScreen.not()) throw IllegalStateException(getString(R.string.permission_denied))
+        if (AppManager.lockScreen.not()) throw IllegalStateException(getString(R.string.action_failed))
     }
 }

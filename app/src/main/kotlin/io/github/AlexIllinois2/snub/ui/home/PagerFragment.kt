@@ -211,7 +211,7 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
         if (frozenTab && !HailData.isChecked(info.packageName)) {
             // Unmanaged frozen app: unfreezing is all we are allowed to do.
             if (AppManager.setAppFrozen(info.packageName, false)) updateCurrentList()
-            else HUI.showToast(R.string.permission_denied)
+            else HUI.showToast(R.string.action_failed)
             return
         }
         launchApp(info.packageName)
@@ -233,7 +233,7 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
                 arrayOf(getString(R.string.action_unfreeze))
             ) { _, _ ->
                 if (AppManager.setAppFrozen(pkg, false)) updateCurrentList()
-                else HUI.showToast(R.string.permission_denied)
+                else HUI.showToast(R.string.action_failed)
             }.setNeutralButton(R.string.action_details) { _, _ ->
                 HUI.startActivity(
                     Settings.ACTION_APPLICATION_DETAILS_SETTINGS, HPackages.packageUri(pkg)
@@ -528,7 +528,7 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
                 label = { it.name }
             ) { AppManager.setAppFrozen(it.packageName, frozen) }
             if (_binding == null) return@launch
-            if (result.succeeded == 0 && result.failed > 0) HUI.showToast(R.string.permission_denied)
+            if (result.succeeded == 0 && result.failed > 0) HUI.showToast(R.string.action_failed)
             else HUI.showToast(
                 if (frozen) R.string.msg_freeze else R.string.msg_unfreeze,
                 if (result.succeeded == 1) result.lastSucceeded else result.succeeded.toString()

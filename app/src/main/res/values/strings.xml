@@ -81,6 +81,7 @@
     <string name="donate_liberapay">Liberapay</string>
     <string name="donate_paypal">PayPal</string>
     <string name="permission_denied">Permission denied</string>
+    <string name="action_failed">Operation failed</string>
     <string name="app_not_installed">App not installed</string>
     <string name="activity_not_found">Launch activity not found</string>
     <string name="operation_failed">Operation failed: %s</string>
