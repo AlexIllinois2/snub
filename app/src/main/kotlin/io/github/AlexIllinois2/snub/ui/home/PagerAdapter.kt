@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -24,6 +25,14 @@ class PagerAdapter(
     private var loadIconJob: Job? = null
     lateinit var onItemClickListener: OnItemClickListener
     lateinit var onItemLongClickListener: OnItemLongClickListener
+
+    /** Selection-mode switch; rebinding shows the per-item checkbox badges. */
+    var multiselect = false
+        set(value) {
+            if (field == value) return
+            field = value
+            notifyItemRangeChanged(0, itemCount)
+        }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder = ViewHolder(
         LayoutInflater.from(parent.context).inflate(R.layout.item_home, parent, false)
@@ -47,6 +56,16 @@ class PagerAdapter(
                 } ?: run {
                     setImageDrawable(context.packageManager.defaultActivityIcon)
                     colorFilter = null
+                }
+            }
+            findViewById<ImageView>(R.id.select_state).run {
+                isVisible = multiselect
+                if (multiselect) {
+                    setImageResource(
+                        if (info in selectedList) R.drawable.ic_baseline_check_box
+                        else R.drawable.ic_baseline_check_box_outline_blank
+                    )
+                    setColorFilter(MaterialColors.getColor(this, androidx.appcompat.R.attr.colorPrimary))
                 }
             }
             findViewById<TextView>(R.id.app_name).run {

@@ -156,9 +156,15 @@ object HailData {
     val fuzzySearch get() = sp.getBoolean(FUZZY_SEARCH, false)
     val nineKeySearch get() = sp.getBoolean(NINE_KEY_SEARCH, false)
     val tileAction get() = sp.getString(TILE_ACTION, ACTION_FREEZE_ALL)!!
-    val skipWhileCharging get() = sp.getBoolean(SKIP_WHILE_CHARGING, false)
-    val skipForegroundApp get() = sp.getBoolean(SKIP_FOREGROUND_APP, false)
-    val skipNotifyingApp get() = sp.getBoolean(SKIP_NOTIFYING_APP, false)
+    var skipWhileCharging: Boolean
+        get() = sp.getBoolean(SKIP_WHILE_CHARGING, false)
+        set(value) = sp.edit { putBoolean(SKIP_WHILE_CHARGING, value) }
+    var skipForegroundApp: Boolean
+        get() = sp.getBoolean(SKIP_FOREGROUND_APP, false)
+        set(value) = sp.edit { putBoolean(SKIP_FOREGROUND_APP, value) }
+    var skipNotifyingApp: Boolean
+        get() = sp.getBoolean(SKIP_NOTIFYING_APP, false)
+        set(value) = sp.edit { putBoolean(SKIP_NOTIFYING_APP, value) }
     val swipeFreezeEnabled get() = sp.getBoolean(SWIPE_FREEZE_ENABLED, false)
     val swipeFreezeInterval get() = sp.getFloat(SWIPE_FREEZE_INTERVAL, 1f)
     val swipeFreezeDelay get() = sp.getFloat(SWIPE_FREEZE_DELAY, 1f)

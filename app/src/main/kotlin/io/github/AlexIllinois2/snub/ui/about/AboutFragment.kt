@@ -78,9 +78,6 @@ class AboutFragment : MainFragment() {
                     Text(
                         text = stringResource(R.string.app_name), style = MaterialTheme.typography.bodyLarge
                     )
-                    Text(
-                        text = stringResource(R.string.app_slogan), style = MaterialTheme.typography.bodyMedium
-                    )
                 }
             }
             Spacer(modifier = Modifier.height(dimensionResource(R.dimen.padding_medium)))

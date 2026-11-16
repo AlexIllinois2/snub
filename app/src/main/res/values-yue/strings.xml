@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">怠</string>
-    <string name="app_slogan">实现冻结自由！</string>
+    <string name="app_slogan">实现冻结自由</string>
     <string name="title_home">首頁</string>
     <string name="title_apps">應用</string>
     <string name="title_settings">設置</string>

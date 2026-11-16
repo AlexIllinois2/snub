@@ -11,6 +11,7 @@ import android.view.*
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.LinearLayout
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.appcompat.widget.SearchView
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -25,9 +26,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.core.view.isVisible
@@ -239,65 +242,45 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
         }
         val frozen = AppManager.isAppFrozen(pkg)
         val action = getString(if (frozen) R.string.action_unfreeze else R.string.action_freeze)
-        MaterialAlertDialogBuilder(activity).setTitle(info.name).setItems(
-            resources.getStringArray(R.array.home_action_entries).filter {
-                (it != getString(R.string.action_freeze) || !frozen) && (it != getString(R.string.action_unfreeze) || frozen) && (it != getString(
-                    R.string.action_pin
-                ) || !info.pinned) && (it != getString(R.string.action_unpin) || info.pinned) && (it != getString(
-                    R.string.action_whitelist
-                ) || !info.whitelisted) && (it != getString(R.string.action_remove_whitelist) || info.whitelisted) && (it != getString(
-                    R.string.action_unfreeze_remove_home
-                ) || frozen)
-            }.toTypedArray()
-        ) { _, which ->
-            when (which) {
-                0 -> launchApp(pkg)
-                1 -> setListFrozen(!frozen, listOf(info))
-                2 -> {
-                    val values = resources.getIntArray(R.array.deferred_task_values)
-                    val entries = arrayOfNulls<String>(values.size)
-                    values.forEachIndexed { i, it ->
-                        entries[i] = resources.getQuantityString(R.plurals.deferred_task_entry, it, it)
-                    }
-                    MaterialAlertDialogBuilder(activity).setTitle(R.string.action_deferred_task)
-                        .setItems(entries) { _, i ->
-                            HWork.setDeferredFrozen(pkg, !frozen, values[i].toLong())
-                            Snackbar.make(
-                                activity.fab, resources.getQuantityString(
-                                    R.plurals.msg_deferred_task, values[i], values[i], action, info.name
-                                ), Snackbar.LENGTH_INDEFINITE
-                            ).setAction(R.string.action_undo) { HWork.cancelWork(pkg) }.show()
-                        }.setNegativeButton(android.R.string.cancel, null).show()
+        val actions = buildList<Pair<String, () -> Unit>> {
+            add(getString(R.string.action_deferred_task) to {
+                val values = resources.getIntArray(R.array.deferred_task_values)
+                val entries = arrayOfNulls<String>(values.size)
+                values.forEachIndexed { i, it ->
+                    entries[i] = resources.getQuantityString(R.plurals.deferred_task_entry, it, it)
                 }
-
-                3 -> {
-                    info.pinned = !info.pinned
-                    HailData.saveApps()
-                    updateCurrentList()
-                }
-
-                4 -> {
-                    info.whitelisted = !info.whitelisted
-                    HailData.saveApps()
-                    updateCurrentList()
-                }
-
-                5 -> tagDialog(info)
-
-                6 -> HShortcuts.addPinShortcut(
+                MaterialAlertDialogBuilder(activity).setTitle(R.string.action_deferred_task)
+                    .setItems(entries) { _, i ->
+                        HWork.setDeferredFrozen(pkg, !frozen, values[i].toLong())
+                        Snackbar.make(
+                            activity.fab, resources.getQuantityString(
+                                R.plurals.msg_deferred_task, values[i], values[i], action, info.name
+                            ), Snackbar.LENGTH_INDEFINITE
+                        ).setAction(R.string.action_undo) { HWork.cancelWork(pkg) }.show()
+                    }.setNegativeButton(android.R.string.cancel, null).show()
+            })
+            add(getString(if (info.pinned) R.string.action_unpin else R.string.action_pin) to {
+                info.pinned = !info.pinned
+                HailData.saveApps()
+                updateCurrentList()
+            })
+            add(getString(if (info.whitelisted) R.string.action_remove_whitelist else R.string.action_whitelist) to {
+                info.whitelisted = !info.whitelisted
+                HailData.saveApps()
+                updateCurrentList()
+            })
+            add(getString(R.string.action_tag_set) to { tagDialog(info) })
+            add(getString(R.string.action_add_pin_shortcut) to {
+                HShortcuts.addPinShortcut(
                     info, pkg, info.name, HailApi.getIntentForPackage(HailApi.ACTION_LAUNCH, pkg)
                 )
-
-                7 -> exportToClipboard(listOf(info))
-                8 -> removeCheckedApp(pkg)
-                9 -> {
-                    // Remove from management first, to keep the swipe-freeze service away,
-                    // then unfreeze so the app cannot be auto-frozen again.
-                    removeCheckedApp(pkg, false)
-                    HailData.saveApps()
-                    setListFrozen(false, listOf(info))
-                }
-            }
+            })
+            add(getString(R.string.action_export_clipboard) to { exportToClipboard(listOf(info)) })
+        }
+        MaterialAlertDialogBuilder(activity).setTitle(info.name).setItems(
+            actions.map { it.first }.toTypedArray()
+        ) { _, which ->
+            actions[which].second()
         }.setNeutralButton(R.string.action_details) { _, _ ->
             HUI.startActivity(
                 Settings.ACTION_APPLICATION_DETAILS_SETTINGS, HPackages.packageUri(pkg)
@@ -324,6 +307,7 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
 
     private fun deselect(update: Boolean = true) {
         selectedList.clear()
+        pagerAdapter.multiselect = false
         if (!update) return
         updateCurrentList()
         updateBarTitle()
@@ -571,6 +555,10 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
         val bgDelayState = mutableStateOf(currentTag?.autoFreezeBackgroundDelay ?: 0f)
         val lockState = mutableStateOf(currentTag?.autoFreezeLock ?: false)
         val lockDelayState = mutableStateOf(currentTag?.autoFreezeLockDelay ?: 0f)
+        // Global auto-freeze skip conditions, previously in the settings page.
+        val skipChargingState = mutableStateOf(HailData.skipWhileCharging)
+        val skipForegroundState = mutableStateOf(HailData.skipForegroundApp)
+        val skipNotifyingState = mutableStateOf(HailData.skipNotifyingApp)
 
         // A ComposeView inside an AlertDialog never gets an input method session on some ROMs
         // ("Ignoring showSoftInput() as view is not served"), so the name input is a classic
@@ -590,7 +578,10 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
                     setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
                     setContent {
                         AppTheme {
-                            TagEditor(bgState, bgDelayState, lockState, lockDelayState)
+                            TagEditor(
+                                bgState, bgDelayState, lockState, lockDelayState,
+                                skipChargingState, skipForegroundState, skipNotifyingState
+                            )
                         }
                     }
                 },
@@ -606,6 +597,9 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
             .setPositiveButton(android.R.string.ok) { _, _ ->
                 val newName = nameEditText.text?.toString() ?: String()
                 if (newName.isBlank()) return@setPositiveButton
+                HailData.skipWhileCharging = skipChargingState.value
+                HailData.skipForegroundApp = skipForegroundState.value
+                HailData.skipNotifyingApp = skipNotifyingState.value
                 if (list == null) { // Edit tag
                     val defaultTab = currentTag!!.id == 0
                     val newId = if (defaultTab) 0 else newName.hashCode()
@@ -675,6 +669,9 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
         bgDelay: MutableState<Float>,
         lock: MutableState<Boolean>,
         lockDelay: MutableState<Float>,
+        skipCharging: MutableState<Boolean>,
+        skipForeground: MutableState<Boolean>,
+        skipNotifying: MutableState<Boolean>,
     ) = Column(
         modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())
     ) {
@@ -702,6 +699,7 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
             Text(
                 text = if (bgDelay.value == 0f) stringResource(R.string.freeze_immediately)
                 else stringResource(R.string.seconds_format, bgDelay.value.toInt()),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodySmall
             )
         }
@@ -724,7 +722,55 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
             Text(
                 text = if (lockDelay.value == 0f) stringResource(R.string.freeze_immediately)
                 else stringResource(R.string.seconds_format, lockDelay.value.toInt()),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 style = MaterialTheme.typography.bodySmall
+            )
+        }
+        val context = LocalContext.current
+        val skipEnabled = HailData.anyAutoFreezePolicy || bg.value || lock.value
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = stringResource(R.string.skip_while_charging),
+                modifier = Modifier.weight(1f),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Switch(checked = skipCharging.value, onCheckedChange = { skipCharging.value = it }, enabled = skipEnabled)
+        }
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = stringResource(R.string.skip_foreground_app),
+                modifier = Modifier.weight(1f),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Switch(checked = skipForeground.value, onCheckedChange = { skipForeground.value = it }, enabled = skipEnabled)
+        }
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = stringResource(R.string.skip_notifying_app),
+                modifier = Modifier.weight(1f),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodyLarge
+            )
+            Switch(
+                checked = skipNotifying.value,
+                onCheckedChange = { value ->
+                    if (value) {
+                        val isGranted = NotificationManagerCompat.getEnabledListenerPackages(context)
+                            .contains(context.packageName)
+                        if (!isGranted) {
+                            app.setAutoFreezeServiceEnabled(true)
+                            context.startActivity(
+                                Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS)
+                                    .setFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                            )
+                            return@Switch
+                        }
+                    }
+                    skipNotifying.value = value
+                },
+                enabled = skipEnabled
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
@@ -776,30 +822,29 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
         if (saveApps) updateCurrentList()
     }
 
-    private fun MenuItem.updateIcon() = icon?.setTint(
-        MaterialColors.getColor(
-            activity.findViewById(R.id.toolbar),
-            if (multiselect) androidx.appcompat.R.attr.colorPrimary else com.google.android.material.R.attr.colorOnSurface
+    private fun MenuItem.updateIcon() {
+        icon = AppCompatResources.getDrawable(
+            activity, if (multiselect) R.drawable.ic_outline_close else R.drawable.ic_outline_select_all
         )
-    )
+        icon?.setTint(
+            MaterialColors.getColor(
+                activity.findViewById(R.id.toolbar),
+                if (multiselect) androidx.appcompat.R.attr.colorPrimary else com.google.android.material.R.attr.colorOnSurface
+            )
+        )
+    }
 
     override fun onMenuItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_multiselect -> {
                 multiselect = !multiselect
+                pagerAdapter.multiselect = multiselect
                 item.updateIcon()
                 if (multiselect) {
                     updateBarTitle()
                     HUI.showToast(R.string.tap_to_select)
                 } else deselect()
             }
-
-            R.id.action_freeze_current -> setListFrozen(true, pagerAdapter.currentList.filterNot { it.whitelisted })
-
-            R.id.action_unfreeze_current -> setListFrozen(false, pagerAdapter.currentList)
-            R.id.action_freeze_all -> setListFrozen(true)
-            R.id.action_unfreeze_all -> setListFrozen(false)
-            R.id.action_freeze_non_whitelisted -> setListFrozen(true, HailData.checkedList.filterNot { it.whitelisted })
 
             R.id.action_import_clipboard -> importFromClipboard()
             R.id.action_import_frozen -> lifecycleScope.launch {
