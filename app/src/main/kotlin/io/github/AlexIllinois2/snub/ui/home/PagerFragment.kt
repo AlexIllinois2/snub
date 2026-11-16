@@ -8,10 +8,11 @@ import android.os.Bundle
 import android.provider.Settings
 import android.text.InputType
 import android.view.*
-import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.LinearLayout
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.appcompat.widget.ButtonBarLayout
 import androidx.appcompat.widget.SearchView
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -649,18 +650,18 @@ class PagerFragment : MainFragment(), PagerAdapter.OnItemClickListener, PagerAda
                     }
                 }
             }.setNegativeButton(android.R.string.cancel, null).create()
-        // Show the IME for the EditText once the dialog window is up.
-        dialog.window?.setSoftInputMode(
-            WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE or WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
-        )
+        // The name field is not focused by default: the user taps it to type.
+        // ADJUST_PAN keeps the dialog from resizing with the IME, which some
+        // ROMs fail to undo when the IME closes.
+        dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
         dialog.show()
-        nameEditText.requestFocus()
-        nameEditText.postDelayed({
-            if (!dialog.isShowing) return@postDelayed
-            nameEditText.requestFocus()
-            val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            imm.showSoftInput(nameEditText, InputMethodManager.SHOW_IMPLICIT)
-        }, 200)
+        // Keep the three buttons on one row: red "remove" on the left, cancel/ok
+        // on the right (ButtonBarLayout stacks them vertically on narrow screens).
+        val neutralButton = dialog.getButton(AlertDialog.BUTTON_NEUTRAL)
+        (neutralButton.parent as? ButtonBarLayout)?.setAllowStacking(false)
+        neutralButton.setTextColor(
+            MaterialColors.getColor(neutralButton, androidx.appcompat.R.attr.colorError)
+        )
     }
 
     @Composable
